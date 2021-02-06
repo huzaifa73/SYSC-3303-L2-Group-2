@@ -16,6 +16,7 @@ class Elevator implements Runnable{
     private int currentFloor;
     private int targetFloor;
     private String timeString;
+    private boolean upDown;
     
     private ArrayList<boolean> buttonStatus; //Check later if needed
 
@@ -37,7 +38,7 @@ class Elevator implements Runnable{
     }
     
     /**
-     * Method: Requests recievedInfo from the scheduler
+     * Method: Requests sendInfo() from the scheduler
      */
     public void readEvent() {
     	//request recievedInfo from Schedular
@@ -47,7 +48,7 @@ class Elevator implements Runnable{
     }
     
     /**
-     * Method: Sends the DataObject Info back to the scheduler
+     * Method: Sends the sendingInfo Info back to the scheduler
      */
     public void sendEvent() {
     	scheduler.receiveInfo(sendingInfo); //************Need to confirm on the name of the method
@@ -62,8 +63,8 @@ class Elevator implements Runnable{
     	//***********Need to confirm the names of theses DataObject Methods
     	currentFloor = data.getCurrentFloor();   
     	targetFloor = data.getTargetFloor();
-    	currentDirection = data.getcurrentDirection();
-    	timeString = data.getTimeStamp();
+    	upDown = data.getupDown();
+    	timeString = data.getTimeString();
     }
     
     /**
@@ -73,14 +74,14 @@ class Elevator implements Runnable{
     	if (currentFloor == targetFloor) {
     		motorStatus = false;
     		elevatorLamps.get(currentFloor) = false;
-    		currentDirection = "Stopped";
+    		currentDirection = "Stopped"; //****
     		doorStatus = true;
     		
     	}
     	else {
     		motorStatus = true;
     		elevatorLamps.get(currentFloor) = false;
-    		currentDirection = "Stopped";
+    		currentDirection = "Stopped";//****
     		doorStatus = true;
     		
     	}
@@ -106,7 +107,7 @@ class Elevator implements Runnable{
     	sendingInfo.setTargetFloor(targetFloor);
     	
     	//set Direction
-    	sendingInfo.setcurrentDirection(currentDirection);
+    	sendingInfo.setUpDown(upDown);
     }
     
     
