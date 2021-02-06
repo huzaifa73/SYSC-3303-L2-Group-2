@@ -1,0 +1,142 @@
+package pack;
+import java.util.concurrent.ThreadLocalRandom;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
+
+class Elevator implements Runnable{
+    private Thread scheduler;
+    private int id;
+    //private ArrayList<String> statusDirection;
+    private String currentDirection;
+    private DataObject receivedInfo;
+    private DataObject sendingInfo;
+    private ArrayList<boolean> elevatorLamps;
+    private boolean doorStatus;
+    private boolean motorStatus;
+    private int currentFloor;
+    private int targetFloor;
+    private String timeString;
+    
+    private ArrayList<boolean> buttonStatus; //Check later if needed
+
+    public Elevator(Thread scheduler, int id) /*****Make sure the parameter ID is given */
+    {
+        this.scheduler = scheduler;
+        doorStatus = false;
+        motorStatus = false;
+        elevatorLamps = new ArrayList();
+        statusDirection = new ArrayList();
+        this.id = id;
+        this.currentFloor = -1;
+        this.targetFloot = null;
+        
+        
+        //DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+    	//LocalDateTime now = LocalDateTime.now();
+        
+    }
+    
+    /**
+     * Method: Requests recievedInfo from the scheduler
+     */
+    public void readEvent() {
+    	//request recievedInfo from Schedular
+    	receivedInfo = scheduler.sendInfo(); //************Need to confirm on the name of the method
+    	receivedInfo.toString();
+    	readInfo(receivedInfo);
+    }
+    
+    /**
+     * Method: Sends the DataObject Info back to the scheduler
+     */
+    public void sendEvent() {
+    	scheduler.receiveInfo(sendingInfo); //************Need to confirm on the name of the method
+    }
+    
+    /**
+     * Method: reads the recievedInfo from the dataObject Event 
+     */
+    public void readInfo(DataObject data) {
+    	//Extract  info from DataObject
+
+    	//***********Need to confirm the names of theses DataObject Methods
+    	currentFloor = data.getCurrentFloor();   
+    	targetFloor = data.getTargetFloor();
+    	currentDirection = data.getcurrentDirection();
+    	timeString = data.getTimeStamp();
+    }
+    
+    /**
+     * Method: Elevator action to perform certain actions based on the current Information
+     */
+    public void ElevatorAction() {
+    	if (currentFloor == targetFloor) {
+    		motorStatus = false;
+    		elevatorLamps.get(currentFloor) = false;
+    		currentDirection = "Stopped";
+    		doorStatus = true;
+    		
+    	}
+    	else {
+    		motorStatus = true;
+    		elevatorLamps.get(currentFloor) = false;
+    		currentDirection = "Stopped";
+    		doorStatus = true;
+    		
+    	}
+    }    
+    
+    /**
+     * Method: Initialize the information to send to the scheduler
+     */
+    public void initializeInfotoSend() {
+    	//Current floor, time, dummy up/down, target floor
+    	
+    	//***********Need to confirm the names of theses DataObject Methods
+    	
+    	//Set Time
+    	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+    	LocalDateTime now = LocalDateTime.now();
+    	sendingInfo.setTime(dtf.format(now));
+    	
+    	//Set current Floor
+    	sendingInfo.setCurrentFloor(currentFloor);
+    	
+    	//set target Floor
+    	sendingInfo.setTargetFloor(targetFloor);
+    	
+    	//set Direction
+    	sendingInfo.setcurrentDirection(currentDirection);
+    }
+    
+    
+    /**
+     * Method: pushes the button in the elevator and updates button/lamp status
+     * @param button The button that was pressed
+     */
+    public void pushButton(int button) {
+    	elevatorLamps.get(button) = true;
+    	initializeInfotoSend();
+    }
+    
+    
+    /*
+     * Method: The run() method is used to start the elevator thread
+     */
+    public void run()
+    {
+        while(true) {
+        	
+        	readEvent();
+        	pushButton(targetFloor);
+        	sendEvent();
+        	readEvent();
+        	ElevatorAction();
+	            
+	        try {
+	            Thread.sleep(1000);
+	        } catch (InterruptedException e) {}
+        	
+        }
+    }
+}
