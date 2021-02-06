@@ -60,7 +60,6 @@ class Elevator implements Runnable{
     public void readInfo(DataObject data) {
     	//Extract  info from DataObject
 
-    	//***********Need to confirm the names of theses DataObject Methods
     	currentFloor = data.getCurrentFloor();   
     	targetFloor = data.getTargetFloor();
     	upDown = data.getupDown();
@@ -92,8 +91,6 @@ class Elevator implements Runnable{
      */
     public void initializeInfotoSend() {
     	//Current floor, time, dummy up/down, target floor
-    	
-    	//***********Need to confirm the names of theses DataObject Methods
     	
     	//Set Time
     	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
