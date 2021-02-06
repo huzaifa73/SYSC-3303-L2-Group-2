@@ -42,6 +42,14 @@ class Scheduler implements Runnable{
     }
     
     //Send a request to the elevator
+    public void request_event() {
+    	if(eventList.getCount() != 0) {
+    		elevator.receive_Request(eventList.get());
+    	}
+    	
+    }
+    
+    //Send a request to the elevator
     private void send_request(Event event) {
     	elevator.receive_Request(event);
     }
