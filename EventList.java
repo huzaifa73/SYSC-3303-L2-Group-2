@@ -3,16 +3,17 @@ package pack;
 import java.util.LinkedList;
 
 /**
- * The basic container class to show mutual exclusion and 
+ * A class holding the event list with mutual exclusion and 
  * condition synchronization.
  * 
- * plate can hold up to three items
+ * 
  * 
  * @author Jerry Xiong
  * @version 1.00
  */
 public class EventList
 {
+	
 	private LinkedList<Event> eventList = new LinkedList<>();
     
     /**
@@ -23,6 +24,7 @@ public class EventList
      */
     public synchronized void put(Event event) {
     	eventList.add(event);
+
         notifyAll();
     }
     
@@ -57,8 +59,11 @@ public class EventList
                 return false;
             }
         }
-        
-        return (eventList.removeFirst() != null);
+        if(eventList.removeFirst() != null) {
+
+        	return true;
+        }
+        return false;
     }
     
     /**
@@ -75,8 +80,11 @@ public class EventList
                 return false;
             }
         }
-        
-        return eventList.remove(event);
+        if(eventList.remove(event)) {
+
+        	return true;
+        }
+        return false;
     }
     
     /**
@@ -90,6 +98,15 @@ public class EventList
         	e.print();
         }
 
+    }
+    
+    /**
+     * Returns count
+     * 
+     * @return Whether the event was removed.
+     */
+    public synchronized int getCount() {
+        return eventList.size();
     }
 
 }
