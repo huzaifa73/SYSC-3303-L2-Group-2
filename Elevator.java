@@ -1,3 +1,10 @@
+/**
+ * Class: Elevator class which continuously requests events from the Schduler
+ * 
+ * @authors Desmond, Hovish
+ * @verison 1.00
+ */
+
 package pack;
 import java.util.concurrent.ThreadLocalRandom;
 import java.time.format.DateTimeFormatter;
@@ -8,8 +15,8 @@ class Elevator implements Runnable{
     private int id;
     //private ArrayList<String> statusDirection;
     private String currentDirection;
-    private DataObject receivedInfo;
-    private DataObject sendingInfo;
+    private Event receivedInfo;
+    private Event sendingInfo;
     private ArrayList<boolean> elevatorLamps;
     private boolean doorStatus;
     private boolean motorStatus;
@@ -20,7 +27,7 @@ class Elevator implements Runnable{
     
     private ArrayList<boolean> buttonStatus; //Check later if needed
 
-    public Elevator(Thread scheduler, int id) /*****Make sure the parameter ID is given */
+    public Elevator(Scheduler scheduler) 
     {
         this.scheduler = scheduler;
         doorStatus = false;
@@ -42,7 +49,7 @@ class Elevator implements Runnable{
      */
     public void readEvent() {
     	//request recievedInfo from Schedular
-    	receivedInfo = scheduler.sendInfo(); //************Need to confirm on the name of the method
+    	receivedInfo = scheduler.request_event(); //************Need to confirm on the name of the method
     	receivedInfo.toString();
     	readInfo(receivedInfo);
     }
@@ -51,13 +58,13 @@ class Elevator implements Runnable{
      * Method: Sends the sendingInfo Info back to the scheduler
      */
     public void sendEvent() {
-    	scheduler.receiveInfo(sendingInfo); //************Need to confirm on the name of the method
+    	scheduler.receive_request(sendingInfo); //************Need to confirm on the name of the method
     }
     
     /**
      * Method: reads the recievedInfo from the dataObject Event 
      */
-    public void readInfo(DataObject data) {
+    public void readInfo(Event data) {
     	//Extract  info from DataObject
 
     	currentFloor = data.getCurrentFloor();   
@@ -90,7 +97,7 @@ class Elevator implements Runnable{
      * Method: Initialize the information to send to the scheduler
      */
     public void initializeInfotoSend() {
-    	//Current floor, time, dummy up/down, target floor
+    	//Current floor, time, up/down, target floor
     	
     	//Set Time
     	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
@@ -118,7 +125,7 @@ class Elevator implements Runnable{
     }
     
     
-    /*
+    /**
      * Method: The run() method is used to start the elevator thread
      */
     public void run()
@@ -126,10 +133,10 @@ class Elevator implements Runnable{
         while(true) {
         	
         	readEvent();
-        	pushButton(targetFloor);
+        	initializeInfotoSend();
         	sendEvent();
-        	readEvent();
-        	ElevatorAction();
+        	//readEvent();
+        	//ElevatorAction();
 	            
 	        try {
 	            Thread.sleep(1000);
