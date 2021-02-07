@@ -17,7 +17,7 @@ class Elevator implements Runnable{
     private String currentDirection;
     private Event receivedInfo;
     private Event sendingInfo;
-    private ArrayList<boolean> elevatorLamps;
+    //private ArrayList<boolean> elevatorLamps;
     private boolean doorStatus;
     private boolean motorStatus;
     private int currentFloor;
@@ -25,14 +25,14 @@ class Elevator implements Runnable{
     private String timeString;
     private boolean upDown;
     
-    private ArrayList<boolean> buttonStatus; //Check later if needed
+    //private ArrayList<boolean> buttonStatus; //Check later if needed
 
     public Elevator(Scheduler scheduler) 
     {
         this.scheduler = scheduler;
         doorStatus = false;
         motorStatus = false;
-        elevatorLamps = new ArrayList();
+        //elevatorLamps = new ArrayList();
         statusDirection = new ArrayList();
         this.id = id;
         this.currentFloor = -1;
@@ -120,7 +120,7 @@ class Elevator implements Runnable{
      * @param button The button that was pressed
      */
     public void pushButton(int button) {
-    	elevatorLamps.get(button) = true;
+    	//elevatorLamps.get(button) = true;
     	initializeInfotoSend();
     }
     
