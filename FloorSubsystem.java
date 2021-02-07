@@ -14,7 +14,11 @@ public class FloorSubsystem {
 	
 	private Thread scheduler;
 	private File requestEvents;
-	
+
+	public FloorSubsystem(Scheduler scheduler) {
+		this.scheduler = scheduler;
+	}
+
 	public FloorSubsystem(Thread scheduler, File requestEvents) {
 	
 		this.scheduler = scheduler;
