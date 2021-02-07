@@ -16,7 +16,8 @@ FloorSubsystem.java:
     
 Scheduler.java:
 
-    A class to schedule the events for the elevators. In this iteration it only acts as a communication system between the floor subsystem and elevator
+    A class to schedule the events for the elevators. In this iteration it only acts as a communication system between the floor subsystem and elevator. This class is used
+    to make sure there is mutual exclusion between the threads and to prevent sychronized access to the data. 
     
 Elevator.java:
 
@@ -25,11 +26,7 @@ Elevator.java:
 Event.java:
 
     The blueprint of a data object that contains the details of an elevator event.
-    
-EventList.java:
-
-    A class to keep a the list of events for the scheduler with mutal exclusion to prevent sychronized access to the data
-
+   
 
 Setup Instructions:
 
