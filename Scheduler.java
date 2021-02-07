@@ -11,17 +11,17 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 
 class Scheduler implements Runnable{
-	private Floor_subsystem floor_subsystem;
-	//Currently only handles one elevator
-	private Elevator elevator;
+    private Floor_subsystem floor_subsystem;
+    //Currently only handles one elevator
+    private Elevator elevator;
 	
-	private EventList eventList = new EventList();
+    private LinkedList<Event> eventList = new LinkedList<>();
 	
-	//List of completed events (mostly for debug purposes)
-	private LinkedList<Event> completedEventList = new LinkedList<>();
+    //List of completed events (mostly for debug purposes)
+    private LinkedList<Event> completedEventList = new LinkedList<>();
 	
-	//Constructs the Scheduler
-    public Scheduler()
+    //Constructs the Scheduler
+	public Scheduler()
     {
 
     }
@@ -33,22 +33,17 @@ class Scheduler implements Runnable{
     }
     
     //receive_request from the floor system or elevators
-    public void receive_request(Event event) {
-    	eventList.put(event);
-    	
+    public synchronized void receive_request(Event event) {
+    	eventList.add(event);
+    	notifyAll();
     }
     
     //Allows elevator to request an event
-    public void request_event() {
-    	if(eventList.getCount() != 0) {
+    public synchronized void request_event() {
+    	if(eventList.size() != 0) {
     		elevator.receive_Request(eventList.get());
     	}
-    	
-    }
-    
-    //Send a request to the elevator
-    private void send_request(Event event) {
-    	elevator.receive_Request(event);
+    	notifyAll();
     }
     
     
@@ -64,11 +59,18 @@ class Scheduler implements Runnable{
     	send_data();
 
     }
+    
+    //Prints the contents of the event list
+    public synchronized void printList() {
+        for(Event e: eventList) {
+        	System.out.println(e);
+        }
+    }
 
     public void run()
     {
         while(true) {
-        	eventList.print();
+        	printList();
 
 
             try {
