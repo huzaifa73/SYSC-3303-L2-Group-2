@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 
 class Scheduler implements Runnable{
-    private Floor_subsystem floor_subsystem;
+    private FloorSubsystem floorSubsystem;
     //Currently only handles one elevator
     private Elevator elevator;
 	
@@ -27,33 +27,33 @@ class Scheduler implements Runnable{
     }
     
     //Needs an additional setup method
-    public void setup(Floor_subsystem floor_subsystem, Elevator elevator) {
-    	this.floor_subsystem = floor_subsystem;
+    public void setup(FloorSubsystem floorSubsystem, Elevator elevator) {
+    	this.floorSubsystem = floorSubsystem;
     	this.elevator = elevator;
     }
     
     //receive_request from the floor system or elevators
-    public synchronized void receive_request(Event event) {
+    public synchronized void receiveRequest(Event event) {
     	eventList.add(event);
     	notifyAll();
     }
     
     //Allows elevator to request an event
-    public synchronized void request_event() {
+    public synchronized void requestEvent() {
     	if(eventList.size() != 0) {
-    		elevator.receive_Request(eventList.peekFirst());
+    		elevator.receiveRequest(eventList.peekFirst());
     	}
     	notifyAll();
     }
     
     
     //Sends data back to the floor subsystem
-    private void send_data() {
+    private void sendData() {
     	
     }
     
     //Gets data back from the elevator
-    public void receive_data(Event event) {
+    public void receiveData(Event event) {
     	completedEventList.add(event);
     	eventList.remove(event);
     	send_data();
