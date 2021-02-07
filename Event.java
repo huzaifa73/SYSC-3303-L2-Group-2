@@ -47,19 +47,19 @@ public class Event {
 		return this.timeString;
 	}
 	
-	public String getUpDown(){
+	public boolean getUpDown(){
 		return this.upDown;
 	}
 	
-	public String getElevatorNumber(){
+	public int getElevatorNumber(){
 		return this.elevatorNumber;
 	}
 
-	public String getTargetFloor(){
+	public int getTargetFloor(){
 		return this.targetFloor;
 	}
 
-	public String getCurrentFloor(){
+	public int getCurrentFloor(){
 		return this.currentFloor;
 	}
 
