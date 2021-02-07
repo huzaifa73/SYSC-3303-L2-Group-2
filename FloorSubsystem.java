@@ -12,14 +12,14 @@ import javax.naming.directory.InvalidAttributesException;
 
 public class FloorSubsystem {
 	
-	private Thread scheduler;
+	private Scheduler scheduler;
 	private File requestEvents;
 
 	public FloorSubsystem(Scheduler scheduler) {
 		this.scheduler = scheduler;
 	}
 
-	public FloorSubsystem(Thread scheduler, File requestEvents) {
+	public FloorSubsystem(Scheduler scheduler, File requestEvents) {
 	
 		this.scheduler = scheduler;
 		this.requestEvents = requestEvents;
