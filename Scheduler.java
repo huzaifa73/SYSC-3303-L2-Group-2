@@ -53,7 +53,7 @@ class Scheduler implements Runnable{
     }
     
     //Gets data back from the elevator
-    private void receive_data(Event event) {
+    public void receive_data(Event event) {
     	completedEventList.add(event);
     	eventList.remove(event);
     	send_data();
