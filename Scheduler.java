@@ -41,7 +41,7 @@ class Scheduler implements Runnable{
     //Allows elevator to request an event
     public synchronized void request_event() {
     	if(eventList.size() != 0) {
-    		elevator.receive_Request(eventList.get());
+    		elevator.receive_Request(eventList.peekFirst());
     	}
     	notifyAll();
     }
