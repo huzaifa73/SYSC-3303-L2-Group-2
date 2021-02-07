@@ -64,20 +64,20 @@ public class Event {
 	}
 
 	//Setters
-	public void setTimeString(timeString){
+	public void setTimeString(String timeString){
 		this.timeString = timeString;
 	}
 
-	public void setUpDown(upDown){
+	public void setUpDown(boolean upDown){
 		this.upDown = upDown;
 	}
 	
-	public String setElevatorNumber(elevatorNumber){
+	public void setElevatorNumber(int elevatorNumber){
 		this.elevatorNumber = elevatorNumber;
 	}
 
-	public void setTargetFloor(){
-		this.setTargetFloor = targetFloor;
+	public void setTargetFloor(int targetFloor){
+		this.targetFloor = targetFloor;
 	}
 
 	
