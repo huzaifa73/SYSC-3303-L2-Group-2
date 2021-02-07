@@ -36,18 +36,21 @@ class Scheduler implements Runnable{
     public void receive_request(Event event) {
     	eventList.put(event);
     	
-    	//For iteration 1, send the request to elevator right away
-    	//Further down the line, an algorithm implemented in the run() function will decide when to send requests
-    	send_request(event);
     }
     
-    //Send a request to the elevator
+    //Allows elevator to request an event
     public void request_event() {
     	if(eventList.getCount() != 0) {
-    		elevator.receive_Request(eventList.getFirst());
+    		elevator.receive_Request(eventList.get());
     	}
     	
     }
+    
+    //Send a request to the elevator
+    private void send_request(Event event) {
+    	elevator.receive_Request(event);
+    }
+    
     
     //Sends data back to the floor subsystem
     private void send_data() {
@@ -58,7 +61,7 @@ class Scheduler implements Runnable{
     private void receive_data(Event event) {
     	completedEventList.add(event);
     	eventList.remove(event);
-	send_data();
+    	send_data();
 
     }
 
