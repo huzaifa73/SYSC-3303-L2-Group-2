@@ -42,12 +42,17 @@ public class Event {
 				"\nCURRENT FLOOR: " + currentFloor);
 	}
 
+	//Getters
 	public String getTimeString(){
 		return this.timeString;
 	}
 	
 	public String getUpDown(){
 		return this.upDown;
+	}
+	
+	public String getElevatorNumber(){
+		return this.elevatorNumber;
 	}
 
 	public String getTargetFloor(){
@@ -58,12 +63,17 @@ public class Event {
 		return this.currentFloor;
 	}
 
+	//Setters
 	public void setTimeString(timeString){
 		this.timeString = timeString;
 	}
 
 	public void setUpDown(upDown){
 		this.upDown = upDown;
+	}
+	
+	public String setElevatorNumber(elevatorNumber){
+		this.elevatorNumber = elevatorNumber;
 	}
 
 	public void setTargetFloor(){
