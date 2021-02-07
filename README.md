@@ -32,3 +32,11 @@ EventList.java:
 
 
 Setup Instructions:
+
+Zip File:
+1) Download and unzip the file containing the code
+2) Open up Eclipse and start a new project using the folder containing the code
+3) If any configuration needs to be done, such as setting up SDK, then set it up
+4) In the class ElevatorSystem, run the main method to see threads executing. 
+5) To test the functionality of the system use the SchedulerTest.java class. Run the main method of 
+   the class to test the test cases. 
