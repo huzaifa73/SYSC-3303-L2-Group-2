@@ -1,4 +1,4 @@
-package pack;
+package pack1;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -9,24 +9,28 @@ class SchedulerTest {
 	Scheduler scheduler = new Scheduler();
 	@Before
 	public void setup() throws Exception{
-		FloorSubsystem floor_subsystem = new FloorSubsystem(scheduler);
-		Elevator elevator = new Elevator(scheduler);
-		scheduler.setup(floor_subsystem, elevator);
 		
 		
 	}
 	@Test
 	void testReceiveRequest() {
+		FloorSubsystem floor_subsystem = new FloorSubsystem(scheduler);
+		Elevator elevator = new Elevator(scheduler);
+		scheduler.setup(floor_subsystem, elevator);
 		Event event = new Event();
-		scheduler.receive_request(event);
+		scheduler.receiveRequest(event);
 		assertEquals(1, scheduler.getList().size());
 		
 	}
 	
 	@Test
 	void testReceiveData() {
+		FloorSubsystem floor_subsystem = new FloorSubsystem(scheduler);
+		Elevator elevator = new Elevator(scheduler);
+		scheduler.setup(floor_subsystem, elevator);
+		
 		Event event = new Event();
-		scheduler.receive_request(event);
+		scheduler.receiveRequest(event);
 		assertEquals(1, scheduler.getList().size());
 		
 		
@@ -35,10 +39,5 @@ class SchedulerTest {
 		
 	}
 
-	
-	@Test
-	void test() {
-		fail("Not yet implemented");
-	}
 
 }
