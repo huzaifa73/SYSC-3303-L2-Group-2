@@ -44,16 +44,10 @@ class Scheduler implements Runnable{
     //Send a request to the elevator
     public void request_event() {
     	if(eventList.getCount() != 0) {
-    		elevator.receive_Request(eventList.get());
+    		elevator.receive_Request(eventList.getFirst());
     	}
     	
     }
-    
-    //Send a request to the elevator
-    private void send_request(Event event) {
-    	elevator.receive_Request(event);
-    }
-    
     
     //Sends data back to the floor subsystem
     private void send_data() {
@@ -64,6 +58,7 @@ class Scheduler implements Runnable{
     private void receive_data(Event event) {
     	completedEventList.add(event);
     	eventList.remove(event);
+	send_data();
 
     }
 
