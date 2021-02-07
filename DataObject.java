@@ -2,14 +2,24 @@ package pack1;
 
 import javax.naming.directory.InvalidAttributesException;
 
-public class DataObject {
+public class Event {
 	
 	private String timeString;
 	private boolean upDown;
+	private int elevatorNumber;
 	private int targetFloor;
 	private int currentFloor;
+
+	//Default Constructor
+	public Event(){
+		String timeString = "no";
+		boolean upDown = true;
+		int elevatorNumber = -1;
+		int targetFloor = -1;
+		int currentFloor = -1;
+	}
 	
-	public DataObject(String timeString, String upDownS, int targetFloor, int currentFloor) throws InvalidAttributesException {
+	public Event(String timeString, String upDownS, int targetFloor, int currentFloor) throws InvalidAttributesException {
 		this.timeString = timeString;
 		this.targetFloor = targetFloor;
 		this.currentFloor = currentFloor;
