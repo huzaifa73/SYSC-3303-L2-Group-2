@@ -33,7 +33,7 @@ public class EventList
      * 
      * @return The object taken from the list.
      */
-    public synchronized Event get() {
+    public synchronized Event getFirst() {
         while (eventList.size() == 0) {
             try {
                 wait();
