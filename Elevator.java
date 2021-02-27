@@ -6,18 +6,18 @@
  */
 
 package pack;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.*;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 
 class Elevator implements Runnable{
-    private Thread scheduler;
+    private Scheduler scheduler;
     private int id;
-    //private ArrayList<String> statusDirection;
+    private ArrayList<String> statusDirection;
     private String currentDirection;
-    private Event receivedInfo;
-    private Event sendingInfo;
-    //private ArrayList<boolean> elevatorLamps;
+    private Event receivedInfo = new Event();
+    private Event sendingInfo = new Event();
+    //private ArrayList<Boolean> elevatorLamps;
     private boolean doorStatus;
     private boolean motorStatus;
     private int currentFloor;
@@ -33,32 +33,40 @@ class Elevator implements Runnable{
         doorStatus = false;
         motorStatus = false;
         //elevatorLamps = new ArrayList();
-        statusDirection = new ArrayList();
-        this.id = id;
+        //statusDirection = new ArrayList();
+        this.id = -1;
         this.currentFloor = -1;
-        this.targetFloot = null;
+        this.targetFloor = -1;
         
-        
+        receivedInfo = new Event();
+        sendingInfo = new Event();
         //DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
     	//LocalDateTime now = LocalDateTime.now();
         
     }
     
     /**
-     * Method: Requests sendInfo() from the scheduler
+     * Method: Requests event from the scheduler
      */
     public void readEvent() {
-    	//request recievedInfo from Schedular
-    	receivedInfo = scheduler.request_event(); //************Need to confirm on the name of the method
-    	receivedInfo.toString();
-    	readInfo(receivedInfo);
+    	//request recievedInfo from Scheduler
+    	scheduler.requestEvent(); 
     }
+    
+    /**
+     * Method: Receives previously requested event from Scheduler
+     */
+    public void receiveRequest(Event event) {
+    	receivedInfo = event;
+    	System.out.println("RECEIVE REQUEST: " + receivedInfo.toString());
+    	readInfo(receivedInfo);
+	}
     
     /**
      * Method: Sends the sendingInfo Info back to the scheduler
      */
     public void sendEvent() {
-    	scheduler.receive_request(sendingInfo); //************Need to confirm on the name of the method
+    	scheduler.receiveData(sendingInfo);
     }
     
     /**
@@ -69,9 +77,11 @@ class Elevator implements Runnable{
 
     	currentFloor = data.getCurrentFloor();   
     	targetFloor = data.getTargetFloor();
-    	upDown = data.getupDown();
+    	upDown = data.getUpDown();
     	timeString = data.getTimeString();
     }
+    
+    
     
     /**
      * Method: Elevator action to perform certain actions based on the current Information
@@ -79,14 +89,14 @@ class Elevator implements Runnable{
     public void ElevatorAction() {
     	if (currentFloor == targetFloor) {
     		motorStatus = false;
-    		elevatorLamps.get(currentFloor) = false;
+    		//elevatorLamps.get(currentFloor) = false;
     		currentDirection = "Stopped"; //****
     		doorStatus = true;
     		
     	}
     	else {
     		motorStatus = true;
-    		elevatorLamps.get(currentFloor) = false;
+    		//elevatorLamps.get(currentFloor) = false;
     		currentDirection = "Stopped";//****
     		doorStatus = true;
     		
@@ -102,7 +112,7 @@ class Elevator implements Runnable{
     	//Set Time
     	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
     	LocalDateTime now = LocalDateTime.now();
-    	sendingInfo.setTime(dtf.format(now));
+    	sendingInfo.setTimeString(dtf.format(now));
     	
     	//Set current Floor
     	sendingInfo.setCurrentFloor(currentFloor);
@@ -124,6 +134,22 @@ class Elevator implements Runnable{
     	initializeInfotoSend();
     }
     
+    //Getters for testing
+    public boolean getUpDown(){
+		return this.upDown;
+	}
+	
+	public String getTimeString(){
+		return this.timeString;
+	}
+
+	public int getTargetFloor(){
+		return this.targetFloor;
+	}
+
+	public int getCurrentFloor(){
+		return this.currentFloor;
+	}
     
     /**
      * Method: The run() method is used to start the elevator thread
