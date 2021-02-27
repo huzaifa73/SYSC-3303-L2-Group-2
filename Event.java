@@ -1,4 +1,4 @@
-package pack1;
+package pack;
 
 import javax.naming.directory.InvalidAttributesException;
 
@@ -80,6 +80,9 @@ public class Event {
 		this.targetFloor = targetFloor;
 	}
 
+	public void setCurrentFloor(int currentFloor){
+		this.currentFloor = currentFloor;
+	}
 	
 
 	
