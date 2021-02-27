@@ -4,7 +4,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 
 /**
- * Class to run the elevator system
+ * Class to run the scheduler system
  * 
  * @author
  * @version 1.00
@@ -35,6 +35,7 @@ class Scheduler implements Runnable{
     //receive_request from the floor system or elevators
     public synchronized void receiveRequest(Event event) {
     	eventList.add(event);
+    	System.out.println("New event added: " + eventList.get(eventList.size()-1));
     	notifyAll();
     }
     
@@ -48,15 +49,15 @@ class Scheduler implements Runnable{
     
     
     //Sends data back to the floor subsystem
-    private void sendData() {
-    	
+    private void sendData(Event event) {
+    	floorSubsystem.completeTransfer(event);
     }
     
     //Gets data back from the elevator
     public void receiveData(Event event) {
     	completedEventList.add(event);
     	eventList.remove(event);
-    	send_data();
+    	sendData(event);
 
     }
     
@@ -65,6 +66,10 @@ class Scheduler implements Runnable{
         for(Event e: eventList) {
         	System.out.println(e);
         }
+    }
+    
+    public LinkedList<Event> getList(){
+    	return eventList;
     }
 
     public void run()
