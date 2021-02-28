@@ -1,5 +1,5 @@
 /**
- * Class: Elevator class which continuously requests events from the Schduler
+ * Class: Elevator class which continuously requests events from the Scheduler
  * 
  * @authors Desmond, Hovish
  * @verison 1.00
@@ -15,33 +15,43 @@ class Elevator implements Runnable{
     private int id;
     private ArrayList<String> statusDirection;
     private String currentDirection;
-    private Event receivedInfo = new Event();
-    private Event sendingInfo = new Event();
+    
+    private Event newReceivedInfo;
+    private Event oldReceivedInfo;
+    private Event sendingInfo;
+    
     //private ArrayList<Boolean> elevatorLamps;
-    private boolean doorStatus;
-    private boolean motorStatus;
+    private boolean doorOpen;
+    
+    //Keep track of button lamps that are pressed with list //TODO
+    
+    
+    private MotorState motorState;
+    private ElevatorStates state;
+    
     private int currentFloor;
     private int targetFloor;
+    private int tempTargetFloor;
     private String timeString;
     private boolean upDown;
     
-    //private ArrayList<boolean> buttonStatus; //Check later if needed
 
     public Elevator(Scheduler scheduler) 
     {
         this.scheduler = scheduler;
-        doorStatus = false;
-        motorStatus = false;
+        doorOpen = false;
+        motorState = MotorState.STOPPED;
+        state = ElevatorStates.State0;
+        
         //elevatorLamps = new ArrayList();
         //statusDirection = new ArrayList();
-        this.id = -1;
-        this.currentFloor = -1;
+        this.id = 1;
+        this.currentFloor = 1;
         this.targetFloor = -1;
-        
-        receivedInfo = new Event();
+        tempTargetFloor = -1;
         sendingInfo = new Event();
-        //DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-    	//LocalDateTime now = LocalDateTime.now();
+        newReceivedInfo = new Event();
+        oldReceivedInfo = new Event();
         
     }
     
@@ -57,9 +67,10 @@ class Elevator implements Runnable{
      * Method: Receives previously requested event from Scheduler
      */
     public void receiveRequest(Event event) {
-    	receivedInfo = event;
-    	System.out.println("RECEIVE REQUEST: " + receivedInfo.toString());
-    	readInfo(receivedInfo);
+    	newReceivedInfo = event;
+    	System.out.println("RECEIVE REQUEST: " + newReceivedInfo.toString());
+    	readInfo(newReceivedInfo);
+    	
 	}
     
     /**
@@ -74,54 +85,12 @@ class Elevator implements Runnable{
      */
     public void readInfo(Event data) {
     	//Extract  info from DataObject
+    	sendingInfo = data;
 
-    	currentFloor = data.getCurrentFloor();   
+    	//currentFloor = data.getCurrentFloor();   
     	targetFloor = data.getTargetFloor();
-    	upDown = data.getUpDown();
+    	//upDown = data.getUpDown();
     	timeString = data.getTimeString();
-    }
-    
-    
-    
-    /**
-     * Method: Elevator action to perform certain actions based on the current Information
-     */
-    public void ElevatorAction() {
-    	if (currentFloor == targetFloor) {
-    		motorStatus = false;
-    		//elevatorLamps.get(currentFloor) = false;
-    		currentDirection = "Stopped"; //****
-    		doorStatus = true;
-    		
-    	}
-    	else {
-    		motorStatus = true;
-    		//elevatorLamps.get(currentFloor) = false;
-    		currentDirection = "Stopped";//****
-    		doorStatus = true;
-    		
-    	}
-    }    
-    
-    /**
-     * Method: Initialize the information to send to the scheduler
-     */
-    public void initializeInfotoSend() {
-    	//Current floor, time, up/down, target floor
-    	
-    	//Set Time
-    	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-    	LocalDateTime now = LocalDateTime.now();
-    	sendingInfo.setTimeString(dtf.format(now));
-    	
-    	//Set current Floor
-    	sendingInfo.setCurrentFloor(currentFloor);
-    	
-    	//set target Floor
-    	sendingInfo.setTargetFloor(targetFloor);
-    	
-    	//set Direction
-    	sendingInfo.setUpDown(upDown);
     }
     
     
@@ -131,7 +100,8 @@ class Elevator implements Runnable{
      */
     public void pushButton(int button) {
     	//elevatorLamps.get(button) = true;
-    	initializeInfotoSend();
+    	tempTargetFloor = button;
+    	readInfo(newReceivedInfo);
     }
     
     //Getters for testing
@@ -158,28 +128,145 @@ class Elevator implements Runnable{
     {
         while(true) {
         	
-        	readEvent();
-        	initializeInfotoSend();
-        	sendEvent();
-        	//readEvent();
-        	//ElevatorAction();
-	            
+        	readEvent();  //Request an event from the scheduler    	
+          	changeState(); //Change the state of the elevator System
+      
+        	
 	        try {
 	            Thread.sleep(1000);
 	        } catch (InterruptedException e) {}
         	
         }
     }
-	
-    private void printWrapper(String msg) {
-	DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-    	LocalDateTime now = LocalDateTime.now();
+    
+
+    /**
+     * Method: This method changes the state of the Elevator
+     */
+	private void changeState() {
+	    
+		switch(state) {
 		
-	System.out.println("_____________________________________________________");
-	System.out.println("                 Elevator");
-	System.out.println("-----------------------------------------------------");
-	System.out.println("Log at time: " + dtf.format(now));
-	System.out.println(msg);
-	System.out.println("_____________________________________________________");
-    }
+		case State0 :
+			//Set the motorState to STOPPED  and open the door
+			motorState = motorState.STOPPED;
+			doorOpen = true;
+			
+			//Check if we received a task and check the targetFloor 
+			if (newReceivedInfo != null) {
+				
+				if (currentFloor == targetFloor) {
+					state = state.State2;
+				}
+				else {
+					state = state.State1;
+				}
+			}
+			else {
+				System.out.println("Elevator stopped and waiting...");
+			}
+			break;
+			
+		case State1:
+			
+			//Check if there is new Received info from the Scheduler
+			if (newReceivedInfo != null) {
+				//Check if targetFloot is greater than currentFloor
+				if (targetFloor != currentFloor && targetFloor > currentFloor) {
+					doorOpen = false;
+					motorState = motorState.UP;
+					move();
+					
+				}
+				//Check if targetFloor is less than currentFloor
+				else if (targetFloor != currentFloor && targetFloor < currentFloor) {
+					doorOpen = false;
+					motorState = motorState.DOWN;
+					move();
+				}
+			}
+			break;
+			
+		case State2:
+			if (newReceivedInfo != null) {
+				if (targetFloor == currentFloor) {
+					
+					//Change state of motor to stopped and open door
+					motorState = motorState.STOPPED;
+					doorOpen = true;
+					
+					//Task is complete, clear the task info
+					newReceivedInfo = null; 
+					oldReceivedInfo = null;
+					System.out.println("Elevator " + id + "reached target and is stopped on floor:" + currentFloor);
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					state = state.State0;				
+				}
+			}
+			break;
+		}
+	}
+
+	/**
+	 * Method: Moves the Elevator up or down a floor while taking into account the time 
+	 */
+	private void move() {
+		
+		while(currentFloor != targetFloor) {
+			//Set oldReceivedInfo equal to newReceivedInfo
+			oldReceivedInfo = newReceivedInfo;
+			
+			//Check if motorState equals UP. If true, then move elevator UP
+			if (motorState.equals(MotorState.UP)) {
+				try {
+					Thread.sleep(9500);  //The time it takes the elevator to move one floor
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				currentFloor++;
+				System.out.println("Elevator " + id + " moved to:" + currentFloor);
+				
+			}
+			//Check if motorState equals UP. If true, then move elevator DOWN
+			else if (motorState.equals(MotorState.DOWN)) {
+				try {
+					Thread.sleep(9500);  //The time it takes the elevator to move one floor
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				currentFloor--;
+				System.out.println("Elevator " + id + " moved to:" + currentFloor);
+			}
+			
+			//Request an event from the scheduler to see if there's an updated one
+			readEvent();
+			
+			//Check if there is a new request
+			if (oldReceivedInfo != newReceivedInfo) {
+				state = state.State1;
+				break;			
+			}
+		}
+		//Go to state 2 if currentFloor == targetFloor
+		if (currentFloor == targetFloor) {
+			state = state.State2;	
+		}
+		
+	}
+	
+	 private void printWrapper(String msg) {
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+		    	LocalDateTime now = LocalDateTime.now();
+				
+			System.out.println("_____________________________________________________");
+			System.out.println("                 Elevator");
+			System.out.println("-----------------------------------------------------");
+			System.out.println("Log at time: " + dtf.format(now));
+			System.out.println(msg);
+			System.out.println("_____________________________________________________");
+		    }
 }
