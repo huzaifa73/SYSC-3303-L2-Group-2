@@ -16,7 +16,7 @@ class Elevator implements Runnable{
     private ArrayList<String> statusDirection;
     private String currentDirection;
     
-    private Event newReceivedInfo;
+    private volatile static Event newReceivedInfo;
     private Event oldReceivedInfo;
     private Event sendingInfo;
     
@@ -29,11 +29,12 @@ class Elevator implements Runnable{
     private MotorState motorState;
     private ElevatorStates state;
     
-    private int currentFloor;
-    private int targetFloor;
+    private volatile static int currentFloor;
+    private volatile static int targetFloor;
     private int tempTargetFloor;
     private String timeString;
-    private boolean upDown;
+
+
     
 
     public Elevator(Scheduler scheduler) 
@@ -47,18 +48,19 @@ class Elevator implements Runnable{
         //statusDirection = new ArrayList();
         this.id = 1;
         this.currentFloor = 1;
-        this.targetFloor = -1;
+        this.targetFloor = 1;
         tempTargetFloor = -1;
         sendingInfo = new Event();
-        newReceivedInfo = new Event();
+        //newReceivedInfo = new Event();
         oldReceivedInfo = new Event();
-        
+
     }
     
     /**
      * Method: Requests event from the scheduler
      */
     public void readEvent() {
+    	
     	//request recievedInfo from Scheduler
     	scheduler.requestEvent(); 
     }
@@ -67,10 +69,12 @@ class Elevator implements Runnable{
      * Method: Receives previously requested event from Scheduler
      */
     public void receiveRequest(Event event) {
+
     	newReceivedInfo = event;
-    	System.out.println("RECEIVE REQUEST: " + newReceivedInfo.toString());
+    	printWrapper("RECEIVE REQUEST: " + newReceivedInfo.toString() + "\nCurrent Elevator Floor " + currentFloor);
     	readInfo(newReceivedInfo);
     	
+    	printState();
 	}
     
     /**
@@ -88,7 +92,7 @@ class Elevator implements Runnable{
     	sendingInfo = data;
 
     	//currentFloor = data.getCurrentFloor();   
-    	targetFloor = data.getTargetFloor();
+    	this.targetFloor = data.getTargetFloor();
     	//upDown = data.getUpDown();
     	timeString = data.getTimeString();
     }
@@ -105,8 +109,8 @@ class Elevator implements Runnable{
     }
     
     //Getters for testing
-    public boolean getUpDown(){
-		return this.upDown;
+    public MotorState getMotorState(){
+		return this.motorState;
 	}
 	
 	public String getTimeString(){
@@ -126,17 +130,22 @@ class Elevator implements Runnable{
      */
     public void run()
     {
+    	
         while(true) {
         	
-        	readEvent();  //Request an event from the scheduler    	
-          	changeState(); //Change the state of the elevator System
-      
+        	readEvent();  //Request an event from the scheduler  
+        	printState();
+        	
+        	if(newReceivedInfo != null) {
+        		changeState(); //Change the state of the elevator System
+        	}
         	
 	        try {
 	            Thread.sleep(1000);
 	        } catch (InterruptedException e) {}
         	
         }
+        
     }
     
 
@@ -163,16 +172,17 @@ class Elevator implements Runnable{
 				}
 			}
 			else {
-				System.out.println("Elevator stopped and waiting...");
+				printWrapper("Elevator stopped and waiting...");
 			}
 			break;
 			
 		case State1:
-			
+
 			//Check if there is new Received info from the Scheduler
 			if (newReceivedInfo != null) {
 				//Check if targetFloot is greater than currentFloor
 				if (targetFloor != currentFloor && targetFloor > currentFloor) {
+					printWrapper("going up...");
 					doorOpen = false;
 					motorState = motorState.UP;
 					move();
@@ -180,9 +190,12 @@ class Elevator implements Runnable{
 				}
 				//Check if targetFloor is less than currentFloor
 				else if (targetFloor != currentFloor && targetFloor < currentFloor) {
+					printWrapper("going down...");
 					doorOpen = false;
 					motorState = motorState.DOWN;
 					move();
+				}else { //Impossible state
+					printWrapper("State Machine Error: s1");
 				}
 			}
 			break;
@@ -190,21 +203,21 @@ class Elevator implements Runnable{
 		case State2:
 			if (newReceivedInfo != null) {
 				if (targetFloor == currentFloor) {
-					
+					printState();
 					//Change state of motor to stopped and open door
 					motorState = motorState.STOPPED;
 					doorOpen = true;
-					
-					//Task is complete,send event to Scheduler, then clear the task info
-					sendEvent();
+					sendingInfo = newReceivedInfo;
+					//Task is complete, clear the task info
 					newReceivedInfo = null; 
 					oldReceivedInfo = null;
-					System.out.println("Elevator " + id + "reached target and is stopped on floor:" + currentFloor);
+					printWrapper("Elevator " + id + " reached target and is stopped on floor: " + currentFloor + " event: " + sendingInfo);
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
+					sendEvent();
 					state = state.State0;				
 				}
 			}
@@ -229,7 +242,7 @@ class Elevator implements Runnable{
 					e.printStackTrace();
 				}
 				currentFloor++;
-				System.out.println("Elevator " + id + " moved to:" + currentFloor);
+				printWrapper("Elevator " + id + " moved to: " + currentFloor);
 				
 			}
 			//Check if motorState equals UP. If true, then move elevator DOWN
@@ -240,7 +253,7 @@ class Elevator implements Runnable{
 					e.printStackTrace();
 				}
 				currentFloor--;
-				System.out.println("Elevator " + id + " moved to:" + currentFloor);
+				printWrapper("Elevator " + id + " moved to: " + currentFloor);
 			}
 			
 			//Request an event from the scheduler to see if there's an updated one
@@ -269,5 +282,9 @@ class Elevator implements Runnable{
 			System.out.println("Log at time: " + dtf.format(now));
 			System.out.println(msg);
 			System.out.println("_____________________________________________________");
-		    }
+	}
+	 
+	 private void printState() {
+		 printWrapper("State: " + state + " \ncurrentFloor: " + currentFloor + " \ntargetFloor: " + targetFloor + "\nnewReceivedInfo: " + newReceivedInfo);
+	 }
 }
