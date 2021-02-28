@@ -195,7 +195,8 @@ class Elevator implements Runnable{
 					motorState = motorState.STOPPED;
 					doorOpen = true;
 					
-					//Task is complete, clear the task info
+					//Task is complete,send event to Scheduler, then clear the task info
+					sendEvent();
 					newReceivedInfo = null; 
 					oldReceivedInfo = null;
 					System.out.println("Elevator " + id + "reached target and is stopped on floor:" + currentFloor);
