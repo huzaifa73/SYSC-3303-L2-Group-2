@@ -46,24 +46,35 @@ class Scheduler implements Runnable{
     	
     	//loop through list
     	int curr = elevator.getCurrentFloor();
-    	//if event's target floor is in the opposite direction, put it at the end (sort it later)
-    	//TODO sort it later means when completing the last task of a particular direct, we flip the direction and resort the list
-    	
-	//Check if the event floor is on the way. Then check if the direction is correct
-    	if(elevator.getUpDown() == (curr <= event.getTargetFloor()) || (event.getUpDown() == (event.getTargetFloor() <= elevator.getTargetFloor()))) { //TODO check what this means...
-
-        	//if the target floor is in the right direction:
-        	//put it in the order of closest to current floor of that elevator
-        	for (int i = 0; i < eventList.size(); i++) {
-        		if((event.getTargetFloor() - curr) < (eventList.get(i).getTargetFloor() - curr)) {
-        			eventList.add(i, event);
-        		}
-        	}
-    	}else {
-    		//opposite direction
-    		printWrapper("Received request in the opposite direction");
-    		eventList.add(event);
+	
+	//Check for redundant requests
+    	boolean redundant = false;
+    	int targetFloor = event.getTargetFloor();
+    	for(Event e: eventList) {
+    		if(e.getTargetFloor() == targetFloor) {
+    			redundant = true;
+    			//No need to add this event to the list. We will already complete it.
+    		}
     	}
+    
+    	//For non redundant requests
+    	if(redundant == false) {    	
+		//Check if the event floor is on the way. Then check if the direction is correct
+		if(elevator.getUpDown() == (curr <= event.getTargetFloor()) || (event.getUpDown() == (event.getTargetFloor() <= elevator.getTargetFloor()))) { //TODO check what this means...
+
+			//if the target floor is in the right direction:
+			//put it in the order of closest to current floor of that elevator
+			for (int i = 0; i < eventList.size(); i++) {
+				if((event.getTargetFloor() - curr) < (eventList.get(i).getTargetFloor() - curr)) {
+					eventList.add(i, event);
+				}
+			}
+		}else {
+			//opposite direction
+			printWrapper("Received request in the opposite direction");
+			eventList.add(event);
+		}
+	}
     	
     	//TODO check that event was added.
     	setState();
