@@ -23,15 +23,19 @@ class Scheduler implements Runnable{
     private LinkedList<Event> completedEventList = new LinkedList<>();
     
     private schedulerState state;
+	
+    //State Machine for scheduler
+    //State 0: event list is empty
+    //State 1: event list has content to provide elevator
     private enum schedulerState {
     	state0,
     	state1
     }
 
     //Constructs the Scheduler
-	public Scheduler()
+    public Scheduler()
     {
-		state = schedulerState.state0;
+	state = schedulerState.state0;
     }
     
     //Needs an additional setup method
@@ -42,7 +46,6 @@ class Scheduler implements Runnable{
     
     //receive_request from the floor system or elevators
     public synchronized void receiveRequest(Event event) {
-    	//eventList.add(event);
     	
     	//loop through list
     	int curr = elevator.getCurrentFloor();
@@ -70,7 +73,7 @@ class Scheduler implements Runnable{
 				}
 			}
 		}else {
-			//opposite direction
+			//Otherwise add to end of list
 			printWrapper("Received request in the opposite direction");
 			eventList.add(event);
 		}
@@ -93,6 +96,7 @@ class Scheduler implements Runnable{
     //Allows elevator to request an event
     public synchronized void requestEvent() {
     	if(state == schedulerState.state1) {
+		printWrapper("Sent Elevator Task");
     		elevator.receiveRequest(eventList.peekFirst());
     	}
     	notifyAll();
@@ -101,6 +105,7 @@ class Scheduler implements Runnable{
     
     //Sends data back to the floor subsystem
     private void sendData(Event event) {
+	printWrapper("Sent completed event to floor: " + event);
     	floorSubsystem.completeTransfer(event);
     }
     
@@ -129,7 +134,6 @@ class Scheduler implements Runnable{
         while(true) {
         	printList();
 
-
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {}
@@ -140,7 +144,7 @@ class Scheduler implements Runnable{
     
 	private void printWrapper(String msg) {
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-    	LocalDateTime now = LocalDateTime.now();
+    		LocalDateTime now = LocalDateTime.now();
 		
 		System.out.println("_____________________________________________________");
 		System.out.println("                 Scheduler");
