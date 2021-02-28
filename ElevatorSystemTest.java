@@ -21,7 +21,6 @@ class ElevatorSystemTest {
 		assertEquals(event.getCurrentFloor(), elevator.getCurrentFloor());
 		assertEquals(event.getTargetFloor(), elevator.getTargetFloor());
 		assertEquals(event.getTimeString(), elevator.getTimeString());
-		assertEquals(event.getUpDown(), elevator.getUpDown());
 		
 		
 		
