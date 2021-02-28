@@ -63,7 +63,7 @@ class Scheduler implements Runnable{
     	//For non redundant requests
     	if(redundant == false) {    	
 		//Check if the event floor is on the way. Then check if the direction is correct
-		if(elevator.getUpDown() == (curr <= event.getTargetFloor()) || (event.getUpDown() == (event.getTargetFloor() <= elevator.getTargetFloor()))) { //TODO check what this means...
+		if((elevator.getMotorState() == MotorState.UP) == (curr <= event.getTargetFloor()) || (event.getUpDown() == (event.getTargetFloor() <= elevator.getTargetFloor()))) { //TODO check what this means...
 
 			//if the target floor is in the right direction:
 			//put it in the order of closest to current floor of that elevator
