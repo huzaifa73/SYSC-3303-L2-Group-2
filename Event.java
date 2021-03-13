@@ -5,6 +5,8 @@
 
 package pack;
 
+import java.io.ByteArrayOutputStream;
+
 import javax.naming.directory.InvalidAttributesException;
 
 public class Event {
@@ -53,6 +55,60 @@ public class Event {
 				"\nDIRECTION: " + direction + 
 				"\nTARGET FLOOR: " + targetFloor + 
 				"\nCURRENT FLOOR: " + currentFloor);
+	}
+	
+	
+	
+	static public byte[] buildByteArray(Event e) {
+		
+		// CREATES AN ARRAY OF BYTES IN THE FORM
+		// direction (1), targetfloor (1), currentfloor(1), time (x)
+		ByteArrayOutputStream eventDataBaos = new ByteArrayOutputStream();
+		
+		// first byte corresponds to direction, 1 for up 0 for down
+		byte toWrite = (byte)((e.getUpDown()) ? 1 : 0);
+		eventDataBaos.write(toWrite);
+		
+		// second byte corresponds to target floor
+		eventDataBaos.write(e.getTargetFloor());
+		
+		// third byte corresponds to current floor
+		eventDataBaos.write(e.getCurrentFloor());
+		
+		// last bytes correspond to time
+		// convert timestring (in the form "yyyy/MM/dd HH:mm:ss") to bytes
+		eventDataBaos.write(e.getTimeString().getBytes());
+		
+		return eventDataBaos.toByteArray();
+	}
+	
+	
+	static public Event rebuildEvent(byte[] eventDataBytes) {
+		
+		// READS IN AN ARRAY OF BYTES IN THE FORM
+		// direction (1), targetfloor (1), currentfloor(1), time (x)
+		Event e = new Event();
+		
+		// first byte corresponds to direction
+		boolean upDown = (eventDataBytes[0] == 1) ? true : false;
+		e.setUpDown(upDown);
+		
+		// second byte corresponds to target floor
+		e.setTargetFloor((int) eventDataBytes[1]);
+		
+		// third byte corresponds to current floor
+		e.setCurrentFloor((int) eventDataBytes[2]);
+		
+		// last bytes correspond to time
+		// convert timestring (in the form "yyyy/MM/dd HH:mm:ss") to bytes
+		byte timeBytes[50];
+		for(int i = 0; i < eventDataBytes.length-1) {
+			timeBytes[i] = eventDataBytes[i+2];
+		}
+		
+		e.setTimeString(new String(timeBytes));
+		
+		return e;
 	}
 
 	//Getters
