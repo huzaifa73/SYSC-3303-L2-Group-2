@@ -1,5 +1,7 @@
 /**
- * Class: Elevator class which continuously requests events from the Scheduler
+ * The Elevator class implements a State Machine design that continually requests 
+ * the Scheduler for new Events, processes them, and then notifies the Scheduler once it is 
+ * finished to receive the next Event.
  * 
  * @authors Desmond, Hovish
  * @verison 1.00
@@ -36,7 +38,11 @@ class Elevator implements Runnable{
 
 
     
-
+    /**
+     * Create a new Elevator with the assigned Scheduler
+     * 
+     * @param scheduler The scheduler object to be used for this elevator
+     */
     public Elevator(Scheduler scheduler) 
     {
         this.scheduler = scheduler;
@@ -57,16 +63,17 @@ class Elevator implements Runnable{
     }
     
     /**
-     * Method: Requests event from the scheduler
+     * Requests a new Event from the Scheduler, will block until one is received
      */
     public void readEvent() {
-    	
     	//request recievedInfo from Scheduler
     	scheduler.requestEvent(); 
     }
     
     /**
-     * Method: Receives previously requested event from Scheduler
+     * Called from the Scheduler class, used to send the previously requested event to the Elevator
+     * 
+     * @param event The Event object to be sent to the Elevator
      */
     public void receiveRequest(Event event) {
 
@@ -78,14 +85,17 @@ class Elevator implements Runnable{
 	}
     
     /**
-     * Method: Sends the sendingInfo Info back to the scheduler
+     * Called when an Event is completed to notify the Scheduler
      */
     public void sendEvent() {
     	scheduler.receiveData(sendingInfo);
     }
     
     /**
-     * Method: reads the recievedInfo from the dataObject Event 
+     * Called only from receiveRequest
+     * Reads the recievedInfo from the Event passed from the scheduler
+     * 
+     * @param event The Event to load data from
      */
     public void readInfo(Event data) {
     	//Extract  info from DataObject
@@ -99,7 +109,7 @@ class Elevator implements Runnable{
     
     
     /**
-     * Method: pushes the button in the elevator and updates button/lamp status
+     * Pushes the button in the elevator and updates button/lamp status
      * @param button The button that was pressed
      */
     public void pushButton(int button) {
@@ -126,7 +136,7 @@ class Elevator implements Runnable{
 	}
     
     /**
-     * Method: The run() method is used to start the elevator thread
+     * Continually request the Scheduler for a new Event and process it using the state machine
      */
     public void run()
     {
@@ -150,7 +160,7 @@ class Elevator implements Runnable{
     
 
     /**
-     * Method: This method changes the state of the Elevator
+     * Change the state of the Elevator according to the variables in the system and the current state
      */
 	private void changeState() {
 	    
@@ -226,7 +236,7 @@ class Elevator implements Runnable{
 	}
 
 	/**
-	 * Method: Moves the Elevator up or down a floor while taking into account the time 
+	 * Moves the Elevator up or down a floor while taking into account the time 
 	 */
 	private void move() {
 		
@@ -271,6 +281,16 @@ class Elevator implements Runnable{
 		}
 		
 	}
+	
+	//Getter for test purposes
+	public Event getReceivedInfo() {
+        return newReceivedInfo;
+    }
+	
+	//Get state for test purposes
+	public ElevatorStates getState(){
+        return this.state;
+    }
 	
 	 private void printWrapper(String msg) {
 			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
