@@ -1,4 +1,5 @@
 package pack;
+import java.lang.module.ModuleDescriptor.Provides;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
@@ -6,8 +7,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 
 /**
- * Class to run the scheduler system
- * 
+ * The Scheduler class implements a State Machine that provides
+ * functionality for the Floor subsystem to send the events it processes 
+ * from an input file, which can then be passed on to an Elevator requesting new events
  * @author
  * @version 1.00
  */
@@ -44,13 +46,16 @@ class Scheduler implements Runnable{
     	this.elevator = elevator;
     }
     
-    //receive_request from the floor system or elevators
+    /**
+     * Called from the Elevator or Floor systems to add a new event to the Scheduler
+     * @param event The event to be added
+     */
     public synchronized void receiveRequest(Event event) {
     	
     	//loop through list
     	int curr = elevator.getCurrentFloor();
 	
-	//Check for redundant requests
+    	//Check for redundant requests
     	boolean redundant = false;
     	int targetFloor = event.getTargetFloor();
     	for(Event e: eventList) {
@@ -63,7 +68,7 @@ class Scheduler implements Runnable{
     	//For non redundant requests
     	if(redundant == false) {    	
 		//Check if the event floor is on the way. Then check if the direction is correct
-		if((eventList.size() > 0) && ((elevator.getMotorState() == MotorState.UP) == (curr <= event.getTargetFloor()) || (event.getUpDown() == (event.getTargetFloor() <= elevator.getTargetFloor())))) {
+    		if((eventList.size() > 0) && ((elevator.getMotorState() == MotorState.UP) == (curr <= event.getTargetFloor()) || (event.getUpDown() == (event.getTargetFloor() <= elevator.getTargetFloor())))) {
 
 			//if the target floor is in the right direction:
 			//put it in the order of closest to current floor of that elevator
@@ -85,6 +90,9 @@ class Scheduler implements Runnable{
     	notifyAll();
     }
     
+    /**
+     * Set the current state of the Scheduler State Machine
+     */
     private void setState() {
     	if(eventList.size() == 0) {
     		state = schedulerState.state0;
@@ -93,7 +101,9 @@ class Scheduler implements Runnable{
     	}
     }
     
-    //Allows elevator to request an event
+    /**
+     * Called from the Elevator subsystem to request a new event be sent 
+     */
     public synchronized void requestEvent() {
     	if(state == schedulerState.state1) {
 		printWrapper("Sent Elevator Task");
@@ -102,14 +112,19 @@ class Scheduler implements Runnable{
     	notifyAll();
     }
     
-    
-    //Sends data back to the floor subsystem
+    /**
+     * Notify the Floor system of any completed Events
+     * @param event
+     */
     private void sendData(Event event) {
 	printWrapper("Sent completed event to floor: " + event);
     	floorSubsystem.completeTransfer(event);
     }
     
-    //Gets data back from the elevator
+    /**
+     * Called from the Elevator class once an Event has been completed
+     * @param event
+     */
     public void receiveData(Event event) {
     	completedEventList.add(event);
     	eventList.remove(event);
