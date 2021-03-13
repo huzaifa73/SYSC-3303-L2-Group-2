@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import javax.naming.directory.InvalidAttributesException;
@@ -31,9 +33,9 @@ public class FloorSubsystem implements Runnable{
 
 	}
 	/**
-	 * make a new FloorSubsystem with the provided Scheduler and Input file
-	 * @param scheduler
-	 * @param requestEvents
+	 * Create a new FloorSubsystem with the provided Scheduler and Input file
+	 * @param scheduler The scheduler to send the processed event requests to
+	 * @param requestEvents The file from which to read the list of requests
 	 */
 	public FloorSubsystem(Scheduler scheduler, File requestEvents) {   
 	
