@@ -1,3 +1,8 @@
+/**
+ * The Event class to model the request events triggered by floor & elevator buttons
+ * in the ElevatorSystem
+ */
+
 package pack;
 
 import javax.naming.directory.InvalidAttributesException;
@@ -19,6 +24,14 @@ public class Event {
 		int currentFloor = -1;
 	}
 	
+	/**
+	 * Create a new Event with the specified params
+	 * @param timeString
+	 * @param upDownS "UP" or "DOWN" case irrelevant
+	 * @param targetFloor
+	 * @param currentFloor
+	 * @throws InvalidAttributesException
+	 */
 	public Event(String timeString, String upDownS, int targetFloor, int currentFloor) throws InvalidAttributesException {
 		this.timeString = timeString;
 		this.targetFloor = targetFloor;
