@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -25,6 +28,8 @@ public class FloorSubsystem implements Runnable{
 	
 	private Scheduler scheduler;
 	private File requestEvents;
+	DatagramSocket sendSocket;
+	DatagramPacket sendPacket;
 	
 	
 	public FloorSubsystem(Scheduler scheduler) {   
@@ -102,13 +107,37 @@ public class FloorSubsystem implements Runnable{
 	 */
 	public void run() {
 		
+		try {
+			sendSocket = new DatagramSocket();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		
 		ArrayList<Event>eventList;
 		// Load list of request events from input file
 		eventList = readRequestEvents(); 
 		
 		// Send list of events to scheduler
-		for(Event e : eventList) {
-			scheduler.receiveRequest(e);
+		for(Event eventToSend : eventList) {
+			
+			// Load sendpacket with event data
+			try {
+				byte msg[] = Event.buildByteArray(eventToSend);
+				sendPacket = new DatagramPacket(msg, msg.length, InetAddress.getLocalHost(), 1999); //1999 is port for scheduler
+			}
+			catch (IOException ee) {
+				ee.printStackTrace();	
+			}
+			
+			// Send packet data to scheduler
+			try {
+				sendSocket.send(sendPacket);
+			}
+			catch (IOException e){
+				e.printStackTrace();
+				System.exit(1);
+			}
 		}
 	}
 	
