@@ -9,23 +9,37 @@ ElevatorSystem.java:
     
 FloorSubsystem.java:
 
-    A class that could make requests for elevators events
+    A class that reads in events from a file and passes them on to the scheduler
     
 Scheduler.java:
 
-    A class to schedule the events for the elevators. In this iteration it only acts as a communication system between the floor subsystem and elevator
+    A class to schedule the events for the elevators. It takes events received from both the Floor and the Elevators, and uses 
+    an algorithm to decide the best Elevator to delegate the task to. It then uses UDP connection to send those events to the chosen elevator. 
     
 Elevator.java:
 
-    A class to execute and request for elevator events.
+    A class to execute the events received from the scheduler.
+
+
+ElevatorInterface.java
+
+   A class used as a stub for the Elevator class to implement UDP communications with the scheduler.
     
 Event.java:
 
-    The blueprint of a data object that contains the details of an elevator event.
+    The data object that contains the details of an elevator event.
     
-EventList.java:
-
-    A class to keep a the list of events for the scheduler with mutal exclusion to prevent sychronized access to the data
-
-
+-------------------
 Setup Instructions:
+
+To load project, place Iteration3.zip into the eclipse workspace, and go to 
+File -> Open Projects from File System -> Archive 
+Select the zip file. Click finish.
+
+Navigate Iteration3.zip_expanded -> Interation3 -> pack -> ElevatorSystem.java
+
+Run ElevatorSystem.java as main, see console for output.
+
+
+
+
