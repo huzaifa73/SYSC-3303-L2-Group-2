@@ -10,7 +10,8 @@ import java.io.ByteArrayOutputStream;
 import javax.naming.directory.InvalidAttributesException;
 
 public class Event {
-	
+	private long delay;
+	private boolean isFloorRequest;
 	private String timeString;
 	private boolean upDown;
 	private int elevatorNumber;
@@ -24,6 +25,13 @@ public class Event {
 		int elevatorNumber = -1;
 		int targetFloor = -1;
 		int currentFloor = -1;
+	}
+	
+	//Copy constructor for elevator to call
+	public Event(Event e) {
+		isFloorRequest = false;
+		this.finalDestination = e.finalDestination;
+		this.targetFloor = e.finalDestination;
 	}
 	
 	/**
@@ -48,13 +56,41 @@ public class Event {
 		}
 	}
 	
+	/**
+	 * Create a new Event with the specified params using delay
+	 * @param isFloorRequest
+	 * @param delay
+	 * @param upDownS "UP" or "DOWN" case irrelevant
+	 * @param finalDestination
+	 * @param targetFloor
+	 * @throws InvalidAttributesException
+	 */
+	public Event(boolean isFloorRequest, long delay, String upDownS, int finalDestination, int targetFloor) throws InvalidAttributesException {
+		this.isFloorRequest = isFloorRequest;
+		this.delay = delay;
+		this.finalDestination = finalDestination;
+		this.targetFloor = targetFloor;
+		this.currentFloor = targetFloor;
+		
+		
+		if(upDownS.toUpperCase().equals("UP"))
+			upDown = true;
+		else if(upDownS.toUpperCase().equals("DOWN"))
+			upDown = false;
+		else {
+			throw new InvalidAttributesException("Direction string not matching UP or DOWN");
+		}
+	}
+	
 	@Override
 	public String toString() {
 		String direction = upDown==true ? "UP" : "DOWN";
-		return new String("TIME: " + timeString + 
+		return new String("DELAY: " + delay + 
+				"\nTIME: " + timeString + 
 				"\nDIRECTION: " + direction + 
 				"\nTARGET FLOOR: " + targetFloor + 
-				"\nCURRENT FLOOR: " + currentFloor);
+				"\nCURRENT FLOOR: " + currentFloor +
+				"\nFINAL DESTINATION: " + finalDestination);
 	}
 	
 	
@@ -130,6 +166,18 @@ public class Event {
 
 	public int getCurrentFloor(){
 		return this.currentFloor;
+	}
+	
+	public long getDelay(){
+		return this.delay;
+	}
+	
+	public boolean getIsFloorRequest() {
+		return this.isFloorRequest;
+	}
+	
+	public int getFinalDestination() {
+		return this.finalDestination;
 	}
 
 	//Setters
