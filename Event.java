@@ -17,6 +17,7 @@ public class Event {
 	private int elevatorNumber;
 	private int targetFloor;
 	private int currentFloor;
+	private int finalDestination;
 
 	//Default Constructor
 	public Event(){
