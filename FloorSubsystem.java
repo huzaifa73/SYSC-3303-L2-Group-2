@@ -139,6 +139,8 @@ public class FloorSubsystem implements Runnable{
 				System.exit(1);
 			}
 		}
+		
+		sendSocket.close;
 	}
 	
 	private void printWrapper(String msg) {
