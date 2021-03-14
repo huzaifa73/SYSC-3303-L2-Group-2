@@ -78,9 +78,15 @@ class Elevator implements Runnable{
     public void receiveRequest(Event event) {
 
     	newReceivedInfo = event;
-    	printWrapper("RECEIVE REQUEST: " + newReceivedInfo.toString() + "\nCurrent Elevator Floor " + currentFloor);
+	printWrapper("RECEIVE REQUEST: " + newReceivedInfo.toString() + "\nCurrent Elevator Floor " + currentFloor);
+	if(event.getIsFloorRequest()) {
+    		Event e = new Event(event);
+    		printWrapper("SEND REQUEST: " + e);
+    		scheduler.receiveRequest(e);
+    	}
     	readInfo(newReceivedInfo);
     	
+
     	printState();
 	}
     
@@ -88,6 +94,7 @@ class Elevator implements Runnable{
      * Called when an Event is completed to notify the Scheduler
      */
     public void sendEvent() {
+
     	scheduler.receiveData(sendingInfo);
     }
     
