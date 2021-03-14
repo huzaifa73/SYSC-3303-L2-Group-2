@@ -118,8 +118,32 @@ public class FloorSubsystem implements Runnable{
 		// Load list of request events from input file
 		eventList = readRequestEvents(); 
 		
+		//Checks if delay matches the delay in the events
+		//If not, wait that long
+		long delay = 0;
+		
 		// Send list of events to scheduler
 		for(Event eventToSend : eventList) {
+			
+			long eventDelay = eventToSend.getDelay();
+			if(eventDelay <= delay) {
+				//No delay needed
+			}else {
+				//Delay not reached, wait and then send
+				try {
+					printWrapper("Waited " + delay + " seconds, before sending event");
+					Thread.sleep(eventDelay*1000);
+					delay += eventDelay;
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+
+			}
+
+			//Set the time before sending
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+    			LocalDateTime now = LocalDateTime.now();
+			eventToSend.setTimeString(dtf.format(now));
 			
 			// Load sendpacket with event data
 			try {
