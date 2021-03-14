@@ -14,7 +14,7 @@ public class ElevatorInterface {
 	Elevator elle; //elevator object
 	private int port; //need local port variable
 	private int elevatorID;
-	private InetAddress address,
+	private InetAddress schedulerAddress,
 	
 	
 	
@@ -37,7 +37,7 @@ public class ElevatorInterface {
 		
 		Event eventToSend = elevator.sendEvent();   //not sure if this should be elevator.intializeinfotosend instead or not, basically the elevator function that sends the data
 		
-		address = InetAddress.getLocalHost();
+		schedulerAddress = InetAddress.getLocalHost();
 		
 		//call function from Event that converts the ElevatorObject to byte array and assign it to a local variable 
 		try {
@@ -140,6 +140,11 @@ public class ElevatorInterface {
 	public Elevator getElevator(){
 		return elle;
 	
+	}
+	
+	//return the port number of the elevator
+	public int getPort(){
+		return port;
 	}
 	
 	
