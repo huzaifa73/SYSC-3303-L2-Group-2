@@ -314,4 +314,10 @@ class Elevator implements Runnable{
 	 private void printState() {
 		 printWrapper("State: " + state + " \ncurrentFloor: " + currentFloor + " \ntargetFloor: " + targetFloor + "\nnewReceivedInfo: " + newReceivedInfo);
 	 }
+	
+	/**
+	* Method: Returns the elevator ID
+	*/
+	public int getID(){
+		return id;
 }
