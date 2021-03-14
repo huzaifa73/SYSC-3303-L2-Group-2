@@ -51,7 +51,7 @@ public class FloorSubsystem implements Runnable{
 
 	/**
 	 * Read an input file with lines structured as 
-	 * "<TIME> <DIRECTION> <TARGET FLOOR> <CURRENT FLOOR>" and create a list
+	 * "<ISFLOORREQUEST> <DELAY> <DIRECTION>  <DIRECTION> <TARGET FLOOR> <CURRENT FLOOR>" and create a list
 	 * of events to be sent to the Scheduler.
 	 * 
 	 * @return ArrayList<Event> The list of events read from the input file
@@ -75,7 +75,7 @@ public class FloorSubsystem implements Runnable{
 			
 				
 				try {
-					eventsList.add(new Event(sArr[0], sArr[1], Integer.parseInt(sArr[2]), Integer.parseInt(sArr[3])));  //parse sArr to retrieve information about the event
+					eventsList.add(new Event(true, Integer.parseInt(sArr[0]), sArr[1], Integer.parseInt(sArr[2]), Integer.parseInt(sArr[3])));   //parse sArr to retrieve information about the event
 				} catch (InvalidAttributesException e) {
 					System.out.println(e);
 					System.exit(1);
