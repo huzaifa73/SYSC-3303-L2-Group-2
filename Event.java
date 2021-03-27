@@ -13,7 +13,7 @@ import javax.naming.directory.InvalidAttributesException;
 public class Event {
 	private long delay;
 	public boolean isFloorRequest;
-	private String timeString;
+	private String timeString = "null";
 	private boolean upDown;
 	private int elevatorNumber;
 	private int targetFloor;
@@ -34,6 +34,7 @@ public class Event {
 		isFloorRequest = false;
 		this.targetFloor = e.finalDestination;
 		this.finalDestination = e.finalDestination;
+		this.timeString = e.timeString;
 		
 	}
 	
@@ -116,6 +117,15 @@ public class Event {
 		// third byte corresponds to current floor
 		eventDataBaos.write(e.getCurrentFloor());
 		
+		
+		eventDataBaos.write(e.getFinalDestination());
+		
+		// the actual last byte corresponds to whether it came from a floor or elevator
+		byte isFloor = (byte)((e.getIsFloorRequest()) ? 1 : 0);
+		eventDataBaos.write(isFloor);
+		
+		//System.out.println("build byte array is floor: " + e.getIsFloorRequest() +" byte: " + isFloor);
+		
 		// last bytes correspond to time
 		// convert timestring (in the form "yyyy/MM/dd HH:mm:ss") to bytes
 		try {
@@ -124,6 +134,7 @@ public class Event {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+
 		
 		return eventDataBaos.toByteArray();
 	}
@@ -145,12 +156,22 @@ public class Event {
 		// third byte corresponds to current floor
 		e.setCurrentFloor((int) eventDataBytes[2]);
 		
+		// third byte corresponds to current floor
+		e.setFinalDestination((int) eventDataBytes[3]);
+		
+		// the actual last byte corresponds to whether it came from a floor or elevator
+		boolean isFloor = (eventDataBytes[4] == 1) ? true : false;
+		e.setIsFloorRequest(isFloor);
+		//System.out.println("rebuild event data ....  is floor: " + e.getIsFloorRequest() +" byte: " + isFloor);
+		
 		// last bytes correspond to time
 		// convert timestring (in the form "yyyy/MM/dd HH:mm:ss") to bytes
 		byte[] timeBytes = new byte[100];
 		for(int i = 0; i < eventDataBytes.length-3; i++) {
 			timeBytes[i] = eventDataBytes[i+3];
 		}
+		
+
 		
 		e.setTimeString(new String(timeBytes).trim());
 		
@@ -211,6 +232,14 @@ public class Event {
 		this.currentFloor = currentFloor;
 	}
 	
+	public void setFinalDestination(int finalDestination){
+		this.finalDestination = finalDestination;
+	}
+	
+
+	public void setIsFloorRequest(boolean isFloorRequest){
+		this.isFloorRequest = isFloorRequest;
+	}
 
 	
 	
