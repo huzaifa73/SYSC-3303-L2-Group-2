@@ -94,6 +94,7 @@ class Elevator implements Runnable{
      * Called when an Event is completed to notify the Scheduler
      */
     public void sendEvent() {
+    	printWrapper("Event Complete: " + sendingInfo);
     	scheduler.receiveData(sendingInfo);
     }
     
@@ -104,8 +105,11 @@ class Elevator implements Runnable{
      * @param event The Event to load data from
      */
     public void readInfo(Event data) {
+    	printWrapper("Read info: " +  data);
     	//Extract  info from DataObject
-    	sendingInfo = data;
+    	//sendingInfo = data;
+    	
+    	newReceivedInfo = data;
 
     	//currentFloor = data.getCurrentFloor();   
     	this.targetFloor = data.getTargetFloor();
@@ -159,7 +163,7 @@ class Elevator implements Runnable{
         	
         	//readEvent();  //Request an event from the scheduler 
         	//recieveAndSend();
-        	printState();
+        	//printState();
         	
         	if(newReceivedInfo != null) {
         		changeState(); //Change the state of the elevator System
@@ -312,7 +316,7 @@ class Elevator implements Runnable{
 		    	LocalDateTime now = LocalDateTime.now();
 				
 			System.out.println("_____________________________________________________");
-			System.out.println("                 Elevator");
+			System.out.println("                 Elevator: " + id);
 			System.out.println("-----------------------------------------------------");
 			System.out.println("Log at time: " + dtf.format(now));
 			System.out.println(msg);
