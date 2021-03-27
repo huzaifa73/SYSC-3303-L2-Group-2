@@ -14,7 +14,7 @@ public class ElevatorSystem {
 	public static void main(String[] args) {
 		
 		//Create threads
-		Thread floor_subsystem, scheduler;
+		Thread floor_subsystem, scheduler, elevator_interface;
 		
 		//Create Objects
 		Scheduler schedulerObj = new Scheduler();
@@ -24,8 +24,12 @@ public class ElevatorSystem {
 		FloorSubsystem floorSubsystem = new FloorSubsystem(schedulerObj, ioFile);
 		schedulerObj.setup(floorSubsystem);
 		
+		//ElevatorInterface elevatorInterface = new ElevatorInterface(2000, 0, schedulerObj);
+		//ElevatorInterface(int port, int elevatorID, Scheduler scheduler)
+				
+				
 		//Later: Create more elevators with Threads here
-		
+
 		
 		//Initialize threads
 		scheduler = new Thread(schedulerObj, "scheduler");
