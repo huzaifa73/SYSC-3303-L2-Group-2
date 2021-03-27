@@ -17,7 +17,7 @@ class Elevator implements Runnable{
     private int id;
     //private ArrayList<String> statusDirection;
     
-    private volatile static Event newReceivedInfo;
+    private Event newReceivedInfo;
     private Event oldReceivedInfo;
     private Event sendingInfo;
     
@@ -30,8 +30,8 @@ class Elevator implements Runnable{
     private MotorState motorState;
     private ElevatorStates state;
     
-    private volatile static int currentFloor;
-    private volatile static int targetFloor;
+    private int currentFloor;
+    private int targetFloor;
     private int tempTargetFloor;
     private String timeString;
     
@@ -57,7 +57,7 @@ class Elevator implements Runnable{
         //statusDirection = new ArrayList();
         this.id = ID;
         this.currentFloor = 1;
-        this.targetFloor = 1;
+        this.targetFloor = -1;
         tempTargetFloor = -1;
         sendingInfo = new Event();
         //newReceivedInfo = new Event();
