@@ -32,8 +32,9 @@ public class Event {
 	//Copy constructor for elevator to call
 	public Event(Event e) {
 		isFloorRequest = false;
-		this.finalDestination = e.finalDestination;
 		this.targetFloor = e.finalDestination;
+		this.finalDestination = e.finalDestination;
+		
 	}
 	
 	/**
@@ -87,7 +88,9 @@ public class Event {
 	@Override
 	public String toString() {
 		String direction = upDown==true ? "UP" : "DOWN";
-		return new String("DELAY: " + delay + 
+		return new String(
+				"isFloorRequest: " + isFloorRequest +
+				"\nDELAY: " + delay + 
 				"\nTIME: " + timeString + 
 				"\nDIRECTION: " + direction + 
 				"\nTARGET FLOOR: " + targetFloor + 
