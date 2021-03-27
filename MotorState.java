@@ -5,6 +5,6 @@ package pack;
  *
  */
 public enum MotorState {
-	UP, DOWN, STOPPED
+	UP, DOWN, STOPPED, STUCK
 
 }
