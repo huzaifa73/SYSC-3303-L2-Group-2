@@ -13,7 +13,7 @@ import javax.naming.directory.InvalidAttributesException;
 public class Event {
 	private long delay;
 	public boolean isFloorRequest;
-	private String timeString;
+	private String timeString = "null";
 	private boolean upDown;
 	private int elevatorNumber;
 	private int targetFloor;
@@ -22,20 +22,22 @@ public class Event {
 	private SystemError eventError;
 
 	//Default Constructor
-	public Event() {
-		this.timeString = "no";
-		this.upDown = true;
-		this.elevatorNumber = -1;
-		this.targetFloor = -1;
-		this.currentFloor = -1;
+	public Event(){
+		String timeString = "no";
+		boolean upDown = true;
+		int elevatorNumber = -1;
+		int targetFloor = -1;
+		int currentFloor = -1;
 		this.eventError = SystemError.NO_ERROR;
 	}
 	
 	//Copy constructor for elevator to call
 	public Event(Event e) {
-		this.isFloorRequest = false;
-		this.finalDestination = e.finalDestination;
+		isFloorRequest = false;
 		this.targetFloor = e.finalDestination;
+		this.finalDestination = e.finalDestination;
+		this.timeString = e.timeString;
+		
 	}
 	
 	/**
@@ -50,7 +52,6 @@ public class Event {
 		this.timeString = timeString;
 		this.targetFloor = targetFloor;
 		this.currentFloor = currentFloor;
-		this.eventError = SystemError.NO_ERROR;
 		
 		if(upDownS.toUpperCase().equals("UP"))
 			upDown = true;
@@ -71,24 +72,22 @@ public class Event {
 	 * @param eventError
 	 * @throws InvalidAttributesException
 	 */
-	public Event(boolean isFloorRequest, long delay, String upDownS, int finalDestination, int targetFloor, int eventErrorCode) 
-			throws InvalidAttributesException {
+	public Event(boolean isFloorRequest, long delay, String upDownS, int finalDestination, int targetFloor, int eventErrorCode) throws InvalidAttributesException {
 		this.isFloorRequest = isFloorRequest;
 		this.delay = delay;
 		this.finalDestination = finalDestination;
 		this.targetFloor = targetFloor;
 		this.currentFloor = targetFloor;
-
+		
 		// Assign error type
 		for (SystemError e : SystemError.values()) {
-	        if (e.errorCode == eventErrorCode) {
-	            this.eventError = e;
-	        }
-	    }
+			 if (e.errorCode == eventErrorCode) {
+			      this.eventError = e;
+			    }
+		}
 		
 		if(eventError == null)
 			throw new IllegalArgumentException("Unexpected value for error code: " + eventErrorCode);
-		
 		
 		
 		if(upDownS.toUpperCase().equals("UP"))
@@ -98,12 +97,16 @@ public class Event {
 		else {
 			throw new InvalidAttributesException("Direction string not matching UP or DOWN");
 		}
+		
+		
 	}
 	
 	@Override
 	public String toString() {
 		String direction = upDown==true ? "UP" : "DOWN";
-		return new String("DELAY: " + delay + 
+		return new String(
+				"isFloorRequest: " + isFloorRequest +
+				"\nDELAY: " + delay + 
 				"\nTIME: " + timeString + 
 				"\nDIRECTION: " + direction + 
 				"\nTARGET FLOOR: " + targetFloor + 
@@ -129,6 +132,15 @@ public class Event {
 		// third byte corresponds to current floor
 		eventDataBaos.write(e.getCurrentFloor());
 		
+		
+		eventDataBaos.write(e.getFinalDestination());
+		
+		// the actual last byte corresponds to whether it came from a floor or elevator
+		byte isFloor = (byte)((e.getIsFloorRequest()) ? 1 : 0);
+		eventDataBaos.write(isFloor);
+		
+		//System.out.println("build byte array is floor: " + e.getIsFloorRequest() +" byte: " + isFloor);
+		
 		// last bytes correspond to time
 		// convert timestring (in the form "yyyy/MM/dd HH:mm:ss") to bytes
 		try {
@@ -137,6 +149,7 @@ public class Event {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+
 		
 		return eventDataBaos.toByteArray();
 	}
@@ -158,6 +171,14 @@ public class Event {
 		// third byte corresponds to current floor
 		e.setCurrentFloor((int) eventDataBytes[2]);
 		
+		// third byte corresponds to current floor
+		e.setFinalDestination((int) eventDataBytes[3]);
+		
+		// the actual last byte corresponds to whether it came from a floor or elevator
+		boolean isFloor = (eventDataBytes[4] == 1) ? true : false;
+		e.setIsFloorRequest(isFloor);
+		//System.out.println("rebuild event data ....  is floor: " + e.getIsFloorRequest() +" byte: " + isFloor);
+		
 		// last bytes correspond to time
 		// convert timestring (in the form "yyyy/MM/dd HH:mm:ss") to bytes
 		byte[] timeBytes = new byte[100];
@@ -165,18 +186,17 @@ public class Event {
 			timeBytes[i] = eventDataBytes[i+3];
 		}
 		
+
+		
 		e.setTimeString(new String(timeBytes).trim());
 		
 		return e;
 	}
+	
 
 	//Getters
 	public String getTimeString(){
 		return this.timeString;
-	}
-	
-	public SystemError getErrorType() {
-		return this.getErrorType();
 	}
 	
 	public boolean getUpDown(){
@@ -228,6 +248,18 @@ public class Event {
 		this.currentFloor = currentFloor;
 	}
 	
+	public void setFinalDestination(int finalDestination){
+		this.finalDestination = finalDestination;
+	}
+	
+
+	public void setIsFloorRequest(boolean isFloorRequest){
+		this.isFloorRequest = isFloorRequest;
+	}
+	
+	public SystemError getErrorType() {
+		return this.getErrorType();
+	}
 
 	
 	
