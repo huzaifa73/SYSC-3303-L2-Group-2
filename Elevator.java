@@ -17,10 +17,14 @@ class Elevator implements Runnable{
     private int id;
     //private ArrayList<String> statusDirection;
     
-    private volatile static Event newReceivedInfo;
+    private Event newReceivedInfo;
     private Event oldReceivedInfo;
     private Event sendingInfo;
     
+    private final long averageDoorClosing = 939000000; //average time taken to close a door.
+    private final long averageFloorMoving = 950000000; //average time taken to move between two floors.
+    
+    private SystemError systemerror;
     //private ArrayList<Boolean> elevatorLamps;
     private boolean doorOpen;
     
@@ -28,16 +32,20 @@ class Elevator implements Runnable{
     
     
     private MotorState motorState;
+    private MotorState previousDirection;
     private ElevatorStates state;
     
-    private volatile static int currentFloor;
-    private volatile static int targetFloor;
+    private int currentFloor;
+    private int targetFloor;
     private int tempTargetFloor;
     private String timeString;
     
     private boolean successIdleState;
     private boolean successMoveState;
     private boolean successDestinationState;
+    
+    private boolean elevator_activated; //Elevator Is Available to run or not
+    private boolean door_stuck; //Boolean controlling if door is stuck.
 
 
     
@@ -53,17 +61,94 @@ class Elevator implements Runnable{
         motorState = MotorState.STOPPED;
         state = ElevatorStates.idleState;
         
+        systemerror = SystemError.NO_ERROR; //Constructs the elevator with no errors.
+        elevator_activated = true; // Activates the elevator as soon as it is constructed.
+        door_stuck = false; // door not stuck.
+        
         //elevatorLamps = new ArrayList();
         //statusDirection = new ArrayList();
         this.id = ID;
         this.currentFloor = 1;
-        this.targetFloor = 1;
+        this.targetFloor = -1;
         tempTargetFloor = -1;
         sendingInfo = new Event();
         //newReceivedInfo = new Event();
         oldReceivedInfo = new Event();
 
     }
+    
+    /**
+	* Deals with the Case when there is a hard fault in the system when the Elevator is Stucked between 2 floors.
+     * @return 
+	*/
+	public void elevator_hard_fault(){
+		if(systemerror == SystemError.TRAVEL_FAULT){ // Deactivates the Elevator	
+			//Prints where the Elevator is Stuck.	
+			elevator_activated =false; //turns of the elevator from the system
+			System.out.println("Elevator"+ id +"is Stuck between floors");
+			System.out.println("Elevator is Stucked between floor: "+ currentFloor +" and "+ floorstuck());
+		}
+	}
+	
+	/**
+	*Soft Handler Deals with the DOOR_FAULT transient error, where the door is not close.
+	*/
+	public void elevator_soft_fault(){
+
+		//Checking if its an error
+		if(systemerror == SystemError.DOOR_FAULT){
+
+			//tries to close the door 5 times
+			for(int i=0;i<5;i++){
+				long starttime = System.nanoTime(); //Gets the start time each time.
+
+				//Printing 
+				printWrapper("Door is closing...");
+				
+				try {
+					Thread.sleep(9390/10);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} //Waiting for 9.39 seconds 
+				long endtime = System.nanoTime();//gets the endTime for closing the door
+			        long elapsedtime = endtime - starttime; // Calculates the time elapsed. 
+					
+					//if the elapsed time is more than twice the average for closing the door
+					if((elapsedtime > (2*averageDoorClosing))||(systemerror == SystemError.DOOR_FAULT)){
+						System.out.println("The door is still stuck."); //Prints
+						continue; //Continue the for loop and tries to close again if condition is not met. 
+					}else{
+						doorOpen = false; //Succeds in closing the door
+						System.out.println("The door closed after "+ (i+1)+ " trials."); 
+						return; //returns to the caller method.
+					}
+				
+			}
+		}
+	}
+	
+	 /**
+		* Prints out where the elevator is Stuck
+		* @return The upper limit of the floor where the floor might have been stuck.
+		*/
+	private int floorstuck(){
+		
+			if(previousDirection == MotorState.UP){
+				motorState = MotorState.STUCK;
+				return (currentFloor+1);			
+			}else if(previousDirection == MotorState.DOWN){
+				motorState = MotorState.STUCK;
+				return (currentFloor-1);	
+			}
+			return -1;
+		}
+	
+	public boolean getElevatorActivation(){
+		return elevator_activated;
+	}
+	
+
     
     /**
      * Requests a new Event from the Scheduler, will block until one is received
@@ -94,6 +179,7 @@ class Elevator implements Runnable{
      * Called when an Event is completed to notify the Scheduler
      */
     public void sendEvent() {
+    	printWrapper("Event Complete: " + sendingInfo);
     	scheduler.receiveData(sendingInfo);
     }
     
@@ -104,13 +190,17 @@ class Elevator implements Runnable{
      * @param event The Event to load data from
      */
     public void readInfo(Event data) {
+    	printWrapper("Read info: " +  data);
     	//Extract  info from DataObject
-    	sendingInfo = data;
+    	//sendingInfo = data;
+    	
+    	newReceivedInfo = data;
 
     	//currentFloor = data.getCurrentFloor();   
     	this.targetFloor = data.getTargetFloor();
     	//upDown = data.getUpDown();
     	timeString = data.getTimeString();
+    	systemerror = data.getErrorType(); //setting the error Type initially.
     }
     
     
@@ -159,7 +249,7 @@ class Elevator implements Runnable{
         	
         	//readEvent();  //Request an event from the scheduler 
         	//recieveAndSend();
-        	printState();
+        	//printState();
         	
         	if(newReceivedInfo != null) {
         		changeState(); //Change the state of the elevator System
@@ -183,7 +273,9 @@ class Elevator implements Runnable{
 		
 		case idleState :
 			//Set the motorState to STOPPED  and open the door
+			previousDirection= motorState;
 			motorState = motorState.STOPPED;
+			long starttime = System.nanoTime(); //gets the time for which the door has been opened.
 			doorOpen = true;
 			
 			//Check if we received a task and check the targetFloor 
@@ -207,17 +299,63 @@ class Elevator implements Runnable{
 			if (newReceivedInfo != null) {
 				//Check if targetFloot is greater than currentFloor
 				if (targetFloor != currentFloor && targetFloor > currentFloor) {
+					starttime = System.nanoTime();
+					printWrapper("Door is closing...");
+					try {
+						Thread.sleep(939);  //initial value: 9390
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} //Waiting for 9.39 seconds 
+					
+
+					long endtime = System.nanoTime();//gets the endTime for closing the door
+			        long elapsedtime = endtime -starttime;
+					
+					//if the elapsed time is more than twice the average for closing the door
+					if((elapsedtime > (2*averageDoorClosing/10))||(systemerror == SystemError.DOOR_FAULT)){
+						System.out.println("The Door is Stuck on Elevator"+ id);
+						//Soft Error Handle.
+						elevator_soft_fault(); //Handles the Door not closing error.
+					}
+					
+					
 					printWrapper("going up...");
 					doorOpen = false;
 					motorState = motorState.UP;
+					previousDirection = motorState;
 					move();
 					
 				}
 				//Check if targetFloor is less than currentFloor
 				else if (targetFloor != currentFloor && targetFloor < currentFloor) {
+					starttime = System.nanoTime();
+					printWrapper("Door is closing...");
+					try {
+						Thread.sleep(9390/10); //initial value: 9390
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} //Waiting for 9.39 seconds 
+					
+
+					long endtime = System.nanoTime();//gets the endTime for closing the door
+					long elapsedtime = endtime -starttime;
+					
+					//if the elapsed time is more than twice the average for closing the door
+					if((elapsedtime > (2*averageDoorClosing))||(systemerror == SystemError.DOOR_FAULT)){
+						System.out.println("The Door is Stuck on Elevator"+ id);
+						//Soft Error Handle.
+						elevator_soft_fault(); //Handles the Door not closing error.
+					}
+					
+					
+					
+					
 					printWrapper("going down...");
 					doorOpen = false;
 					motorState = motorState.DOWN;
+					previousDirection = motorState;
 					move();
 				}else { //Impossible state
 					printWrapper("State Machine Error: s1");
@@ -255,28 +393,62 @@ class Elevator implements Runnable{
 	 */
 	private void move() {
 		
+		long starttime;
+		long finaltime;
+		long elapsedtime;
+		
+		if((systemerror == SystemError.TRAVEL_FAULT)){ //checks if upon calling move the door is still open or elevator is stuck
+			elevator_hard_fault(); //Handles the TRAVEL FAULT;
+			return;//exits the method.
+		}
+		
 		while(currentFloor != targetFloor) {
 			//Set oldReceivedInfo equal to newReceivedInfo
 			oldReceivedInfo = newReceivedInfo;
 			
 			//Check if motorState equals UP. If true, then move elevator UP
 			if (motorState.equals(MotorState.UP)) {
+				starttime = System.nanoTime(); //gets the StartTime for moving up by 1 floor.
 				try {
 					Thread.sleep(9500);  //The time it takes the elevator to move one floor
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
+				finaltime = System.nanoTime();//Gets end time After moving up by 1 floor.
+				elapsedtime = finaltime - starttime;
+
+				//Actual TRAVEL_Fault	
+				if(elapsedtime>(2 * averageFloorMoving/10)){ //verifying if the floor is taking too long to move
+					systemerror = SystemError.TRAVEL_FAULT;
+					elevator_hard_fault();  //handler to handle the Travel Fault.
+					return; //(Exit the while loop) 
+				}
+				
+				
 				currentFloor++;
 				printWrapper("Elevator " + id + " moved to: " + currentFloor);
 				
 			}
 			//Check if motorState equals UP. If true, then move elevator DOWN
 			else if (motorState.equals(MotorState.DOWN)) {
+				starttime = System.nanoTime(); //gets the StartTime for moving down by 1 floor.
 				try {
-					Thread.sleep(9500);  //The time it takes the elevator to move one floor
+					Thread.sleep(9500/10);  //The time it takes the elevator to move one floor
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
+				
+				finaltime = System.nanoTime();//Gets end time After moving down by 1 floor.			
+				elapsedtime = finaltime - starttime; //Time taken to move down.
+
+				//Actual TRAVEL_Fault	
+				if(elapsedtime>(2 * averageFloorMoving/10)){
+									systemerror = SystemError.TRAVEL_FAULT;
+									//call  hard error handling method
+									elevator_hard_fault(); 
+				return; //exits the method 
+								}
+
 				currentFloor--;
 				printWrapper("Elevator " + id + " moved to: " + currentFloor);
 			}
@@ -312,7 +484,7 @@ class Elevator implements Runnable{
 		    	LocalDateTime now = LocalDateTime.now();
 				
 			System.out.println("_____________________________________________________");
-			System.out.println("                 Elevator");
+			System.out.println("                 Elevator: " + id);
 			System.out.println("-----------------------------------------------------");
 			System.out.println("Log at time: " + dtf.format(now));
 			System.out.println(msg);
