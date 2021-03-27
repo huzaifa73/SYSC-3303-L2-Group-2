@@ -2,6 +2,8 @@ package pack;
 
 import java.io.*;
 import java.net.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 
 //make a method to 
@@ -25,7 +27,7 @@ public class ElevatorInterface implements Runnable{
 		elle = new Elevator(scheduler, elevatorID);
 		
 		//Starts Thread for elevator
-		elevatorThread = new Thread(scheduler, "scheduler"); 
+		elevatorThread = new Thread(elle, "Elle-vator"); 
 		elevatorThread.start();
 		try {
 			receiveSocket = new DatagramSocket(port);
@@ -41,7 +43,7 @@ public class ElevatorInterface implements Runnable{
 		} //instantiate
 		
 		this.port = port; 
-
+		this.elevatorID = elevatorID; 
 		
 	}
 	
@@ -73,27 +75,31 @@ public class ElevatorInterface implements Runnable{
 
 		}
 		
+		sendSocket.close();
+		
 		
 	}
 	
 	//receive an event from schedular in byte format, convert to event, send said event to elevator
 	public void receive() {
-		
+		printWrapper("Receive ");
 			//instatiate data and receivepacket
             byte data[] = new byte[100];
             receivePacket = new DatagramPacket(data, data.length);
             Event eventToSend;
-
+            printWrapper("Receive 1 ");
             
             //receive a packet
             try {   
+            	printWrapper("Receive 2");
                 receiveSocket.receive(receivePacket);
             
             } catch (IOException e) {
+            	printWrapper("Receive error ");
                 e.printStackTrace();
                 System.exit(1);
             }
-            
+            printWrapper("Receive 3 ");
             //sleep
             try { 
                 Thread.sleep(5000);
@@ -102,17 +108,18 @@ public class ElevatorInterface implements Runnable{
                 System.exit(1);
             }
 
-            
+            printWrapper("Receive 4");
            //get data from packet
            data = receivePacket.getData();
-           
+           printWrapper("Receive 5 ");
            //call Event function rebuildEvent that will convert the byte into a Event object
            eventToSend = Event.rebuildEvent(data); //
            
            elle.readInfo(eventToSend);
-        
            
-           send();
+           receiveSocket.close();
+           
+
 		
 	}
 	
@@ -125,7 +132,9 @@ public class ElevatorInterface implements Runnable{
 	
 	//run method
 	public void run() {
+
 		receive();
+		send();
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
@@ -145,6 +154,16 @@ public class ElevatorInterface implements Runnable{
 		return port;
 	}
 	
-	
+	 private void printWrapper(String msg) {
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+		    LocalDateTime now = LocalDateTime.now();
+				
+			System.out.println("_____________________________________________________");
+			System.out.println("                Elevator Interface: " + elevatorID);
+			System.out.println("-----------------------------------------------------");
+			System.out.println("Log at time: " + dtf.format(now));
+			System.out.println(msg);
+			System.out.println("_____________________________________________________");
+	}
 
 }
