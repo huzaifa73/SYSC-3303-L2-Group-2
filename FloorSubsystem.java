@@ -18,7 +18,7 @@ import javax.naming.directory.InvalidAttributesException;
 Floor Subsystem is a class that could make requests for elevators events
 @author Cameron Maccoll, Huzaifa Mazhar
 @version 1.0
-@date February 6th 2020 
+@date March 27th 2021 
 */
 
 
@@ -54,12 +54,12 @@ public class FloorSubsystem implements Runnable{
 
 	/**
 	 * Read an input file with lines structured as 
-	 * "<ISFLOORREQUEST> <DELAY> <DIRECTION>  <DIRECTION> <TARGET FLOOR> <CURRENT FLOOR>" and create a list
+	 * "<DELAY> <DIRECTION> <TARGET FLOOR> <CURRENT FLOOR>" and create a list
 	 * of events to be sent to the Scheduler.
 	 * 
 	 * @return ArrayList<Event> The list of events read from the input file
 	 */
-	ArrayList<Event> readRequestEvents() {
+	ArrayList<Event> readRequestEvents() throws Exception{
 		
 		ArrayList<Event> eventsList = null;   //create new array list object
 		
@@ -76,14 +76,15 @@ public class FloorSubsystem implements Runnable{
 				
 				sArr = s.split(" ");  //split will break any string into an array of strings called sArr, where the the said string is broken apart by some whitespace
 			
-				
+				if(sArr.length != 5)
+					throw new Exception("Incorrect formatting of input file");
 				try {
-					eventsList.add(new Event(true, Integer.parseInt(sArr[0]), sArr[1], Integer.parseInt(sArr[2]), Integer.parseInt(sArr[3])));   //parse sArr to retrieve information about the event
+					eventsList.add(new Event(true, Integer.parseInt(sArr[0]), sArr[1], Integer.parseInt(sArr[2]), Integer.parseInt(sArr[3]), Integer.parseInt(sArr[4])));   //parse sArr to retrieve information about the event
 				} catch (InvalidAttributesException e) {
 					System.out.println(e);
 					System.exit(1);
 				}
-				System.out.println("\nNew data obj:\n" + eventsList.get(eventsList.size() - 1));  //display new data object
+				//System.out.println("\nNew data obj:\n" + eventsList.get(eventsList.size() - 1));  //display new data object
 			}
 			
 			bReader.close();
@@ -110,6 +111,7 @@ public class FloorSubsystem implements Runnable{
 	 */
 	public void run() {
 		
+		
 		try {
 			//sendSocket = new DatagramSocket();
 			//Took this out of the loop... putting it in constructor instead.
@@ -118,9 +120,15 @@ public class FloorSubsystem implements Runnable{
 		}
 		
 		
-		ArrayList<Event>eventList;
+		ArrayList<Event>eventList = null;
+		
 		// Load list of request events from input file
-		eventList = readRequestEvents(); 
+		try {
+			eventList = readRequestEvents(); 
+		} catch (Exception e) {
+			System.err.println("Error reading file" + e);
+		}
+		
 		
 		//Checks if delay matches the delay in the events
 		//If not, wait that long

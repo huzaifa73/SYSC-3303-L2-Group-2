@@ -19,19 +19,21 @@ public class Event {
 	private int targetFloor;
 	private int currentFloor;
 	private int finalDestination;
+	private SystemError eventError;
 
 	//Default Constructor
-	public Event(){
-		String timeString = "no";
-		boolean upDown = true;
-		int elevatorNumber = -1;
-		int targetFloor = -1;
-		int currentFloor = -1;
+	public Event() {
+		this.timeString = "no";
+		this.upDown = true;
+		this.elevatorNumber = -1;
+		this.targetFloor = -1;
+		this.currentFloor = -1;
+		this.eventError = SystemError.NO_ERROR;
 	}
 	
 	//Copy constructor for elevator to call
 	public Event(Event e) {
-		isFloorRequest = false;
+		this.isFloorRequest = false;
 		this.finalDestination = e.finalDestination;
 		this.targetFloor = e.finalDestination;
 	}
@@ -48,6 +50,7 @@ public class Event {
 		this.timeString = timeString;
 		this.targetFloor = targetFloor;
 		this.currentFloor = currentFloor;
+		this.eventError = SystemError.NO_ERROR;
 		
 		if(upDownS.toUpperCase().equals("UP"))
 			upDown = true;
@@ -65,14 +68,27 @@ public class Event {
 	 * @param upDownS "UP" or "DOWN" case irrelevant
 	 * @param finalDestination
 	 * @param targetFloor
+	 * @param eventError
 	 * @throws InvalidAttributesException
 	 */
-	public Event(boolean isFloorRequest, long delay, String upDownS, int finalDestination, int targetFloor) throws InvalidAttributesException {
+	public Event(boolean isFloorRequest, long delay, String upDownS, int finalDestination, int targetFloor, int eventErrorCode) 
+			throws InvalidAttributesException {
 		this.isFloorRequest = isFloorRequest;
 		this.delay = delay;
 		this.finalDestination = finalDestination;
 		this.targetFloor = targetFloor;
 		this.currentFloor = targetFloor;
+
+		// Assign error type
+		for (SystemError e : SystemError.values()) {
+	        if (e.errorCode == eventErrorCode) {
+	            this.eventError = e;
+	        }
+	    }
+		
+		if(eventError == null)
+			throw new IllegalArgumentException("Unexpected value for error code: " + eventErrorCode);
+		
 		
 		
 		if(upDownS.toUpperCase().equals("UP"))
@@ -157,6 +173,10 @@ public class Event {
 	//Getters
 	public String getTimeString(){
 		return this.timeString;
+	}
+	
+	public SystemError getErrorType() {
+		return this.getErrorType();
 	}
 	
 	public boolean getUpDown(){
