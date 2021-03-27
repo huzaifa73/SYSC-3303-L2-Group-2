@@ -1,11 +1,12 @@
-package pack1;
+package pack;
+
 import java.io.*;
 import java.net.*;
 
 
 //make a method to 
 
-public class ElevatorInterface {
+public class ElevatorInterface implements Runnable{
 	
 	
 //this class will act as an intermediary between elevator and schedular, need 2 sockets and packets (send and receive)
@@ -14,15 +15,30 @@ public class ElevatorInterface {
 	Elevator elle; //elevator object
 	private int port; //need local port variable
 	private int elevatorID;
-	private InetAddress schedulerAddress,
+	private InetAddress schedulerAddress;
 	
 	
 	
-	public ElevatorInterface(int port, int elevatorID) {
+	public ElevatorInterface(int port, int elevatorID, Scheduler scheduler) {
 		
-		elle = new Elevator(elevatorID);
-		receiveSocket = new DatagramSocket(port); //instantiate with 23 for schedular port
-		sendSocket = new DatagramSocket(); //instantiate
+		Thread elevatorThread;
+		elle = new Elevator(scheduler, elevatorID);
+		
+		//Starts Thread for elevator
+		elevatorThread = new Thread(scheduler, "scheduler"); 
+		elevatorThread.start();
+		try {
+			receiveSocket = new DatagramSocket(port);
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} //instantiate with 23 for schedular port
+		try {
+			sendSocket = new DatagramSocket();
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} //instantiate
 		
 		this.port = port; 
 
@@ -35,20 +51,17 @@ public class ElevatorInterface {
 		//take in event from elevator, process, send to schedular
 		//receive datapacket, validate, call Event.RebuildEvent() to get the event
 		
-		Event eventToSend = elevator.sendEvent();   //not sure if this should be elevator.intializeinfotosend instead or not, basically the elevator function that sends the data
+		Event eventToSend = elle.getEvent();   //not sure if this should be elevator.intializeinfotosend instead or not, basically the elevator function that sends the data
 		
-		schedulerAddress = InetAddress.getLocalHost();
-		
-		//call function from Event that converts the ElevatorObject to byte array and assign it to a local variable 
 		try {
-			byte msg[] = Event.buildByteArray(eventToSend);
-			sendPacket = new DatagramPacket(msg, msg.length, address, 1999); //1999 is port for schedular
-			
+			schedulerAddress = InetAddress.getLocalHost();
+		} catch (UnknownHostException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
-		catch (IOException ee) {
-			ee.printStackTrace();
-			
-		}
+		
+		byte msg[] = Event.buildByteArray(eventToSend);
+		sendPacket = new DatagramPacket(msg, msg.length, schedulerAddress, 1999); //1999 is port for schedular
 		
 		
 		try {
@@ -96,30 +109,10 @@ public class ElevatorInterface {
            //call Event function rebuildEvent that will convert the byte into a Event object
            eventToSend = Event.rebuildEvent(data); //
            
-           elevator.readInfo(data);
+           elle.readInfo(eventToSend);
         
-  
-            sendPacket = new DatagramPacket(data, receivePacket.getLength(),
-                    receivePacket.getAddress(), receivePacket.getPort());
-
-            //send packet
-            try {
-                sendSocket.send(sendPacket);
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
-
-            try {
-                Thread.sleep(1000);
-            } catch (Exception e) {
-            }
-     
-            
-            
-        //receive datapacket, validate, call Event.RebuildEvent() to get the event
-            
-             
+           
+           send();
 		
 	}
 	
@@ -133,7 +126,12 @@ public class ElevatorInterface {
 	//run method
 	public void run() {
 		receive();
-		sleep(500);
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	//return method to retreive Elevator

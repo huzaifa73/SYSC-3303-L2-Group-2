@@ -13,10 +13,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 
 class Elevator implements Runnable{
-    private Scheduler scheduler;
+	private Scheduler scheduler;
     private int id;
-    private ArrayList<String> statusDirection;
-    private String currentDirection;
+    //private ArrayList<String> statusDirection;
     
     private volatile static Event newReceivedInfo;
     private Event oldReceivedInfo;
@@ -35,6 +34,10 @@ class Elevator implements Runnable{
     private volatile static int targetFloor;
     private int tempTargetFloor;
     private String timeString;
+    
+    private boolean successIdleState;
+    private boolean successMoveState;
+    private boolean successDestinationState;
 
 
     
@@ -43,16 +46,16 @@ class Elevator implements Runnable{
      * 
      * @param scheduler The scheduler object to be used for this elevator
      */
-    public Elevator(Scheduler scheduler) 
+    public Elevator(Scheduler scheduler, int ID) 
     {
         this.scheduler = scheduler;
         doorOpen = false;
         motorState = MotorState.STOPPED;
-        state = ElevatorStates.State0;
+        state = ElevatorStates.idleState;
         
         //elevatorLamps = new ArrayList();
         //statusDirection = new ArrayList();
-        this.id = 1;
+        this.id = ID;
         this.currentFloor = 1;
         this.targetFloor = 1;
         tempTargetFloor = -1;
@@ -64,37 +67,33 @@ class Elevator implements Runnable{
     
     /**
      * Requests a new Event from the Scheduler, will block until one is received
-     */
+     
     public void readEvent() {
     	//request recievedInfo from Scheduler
     	scheduler.requestEvent(); 
     }
+    */
     
     /**
      * Called from the Scheduler class, used to send the previously requested event to the Elevator
      * 
      * @param event The Event object to be sent to the Elevator
-     */
+     
     public void receiveRequest(Event event) {
 
     	newReceivedInfo = event;
-	printWrapper("RECEIVE REQUEST: " + newReceivedInfo.toString() + "\nCurrent Elevator Floor " + currentFloor);
-	if(event.getIsFloorRequest()) {
-    		Event e = new Event(event);
-    		printWrapper("SEND REQUEST: " + e);
-    		scheduler.receiveRequest(e);
-    	}
+    	printWrapper("RECEIVE REQUEST: " + newReceivedInfo.toString() + "\nCurrent Elevator Floor " + currentFloor);
     	readInfo(newReceivedInfo);
     	
-
     	printState();
 	}
+	*/
+	
     
     /**
      * Called when an Event is completed to notify the Scheduler
      */
     public void sendEvent() {
-
     	scheduler.receiveData(sendingInfo);
     }
     
@@ -141,6 +140,14 @@ class Elevator implements Runnable{
 	public int getCurrentFloor(){
 		return this.currentFloor;
 	}
+	
+	public int getID() {  
+		return id;
+	}
+	
+	public Event getEvent() {
+		return sendingInfo;
+	}
     
     /**
      * Continually request the Scheduler for a new Event and process it using the state machine
@@ -150,7 +157,8 @@ class Elevator implements Runnable{
     	
         while(true) {
         	
-        	readEvent();  //Request an event from the scheduler  
+        	//readEvent();  //Request an event from the scheduler 
+        	//recieveAndSend();
         	printState();
         	
         	if(newReceivedInfo != null) {
@@ -173,7 +181,7 @@ class Elevator implements Runnable{
 	    
 		switch(state) {
 		
-		case State0 :
+		case idleState :
 			//Set the motorState to STOPPED  and open the door
 			motorState = motorState.STOPPED;
 			doorOpen = true;
@@ -182,10 +190,10 @@ class Elevator implements Runnable{
 			if (newReceivedInfo != null) {
 				
 				if (currentFloor == targetFloor) {
-					state = state.State2;
+					state = state.destinationState;
 				}
 				else {
-					state = state.State1;
+					state = state.moveState;
 				}
 			}
 			else {
@@ -193,7 +201,7 @@ class Elevator implements Runnable{
 			}
 			break;
 			
-		case State1:
+		case moveState:
 
 			//Check if there is new Received info from the Scheduler
 			if (newReceivedInfo != null) {
@@ -217,7 +225,7 @@ class Elevator implements Runnable{
 			}
 			break;
 			
-		case State2:
+		case destinationState:
 			if (newReceivedInfo != null) {
 				if (targetFloor == currentFloor) {
 					printState();
@@ -234,8 +242,8 @@ class Elevator implements Runnable{
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					sendEvent();
-					state = state.State0;				
+					//sendEvent();
+					state = state.idleState;				
 				}
 			}
 			break;
@@ -274,17 +282,17 @@ class Elevator implements Runnable{
 			}
 			
 			//Request an event from the scheduler to see if there's an updated one
-			readEvent();
+			//readEvent();
 			
 			//Check if there is a new request
 			if (oldReceivedInfo != newReceivedInfo) {
-				state = state.State1;
+				state = state.moveState;
 				break;			
 			}
 		}
 		//Go to state 2 if currentFloor == targetFloor
 		if (currentFloor == targetFloor) {
-			state = state.State2;	
+			state = state.destinationState;	
 		}
 		
 	}
@@ -314,10 +322,5 @@ class Elevator implements Runnable{
 	 private void printState() {
 		 printWrapper("State: " + state + " \ncurrentFloor: " + currentFloor + " \ntargetFloor: " + targetFloor + "\nnewReceivedInfo: " + newReceivedInfo);
 	 }
-	
-	/**
-	* Method: Returns the elevator ID
-	*/
-	public int getID(){
-		return id;
+	 
 }

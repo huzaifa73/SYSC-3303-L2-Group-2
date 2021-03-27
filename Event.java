@@ -6,12 +6,13 @@
 package pack;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import javax.naming.directory.InvalidAttributesException;
 
 public class Event {
 	private long delay;
-	private boolean isFloorRequest;
+	public boolean isFloorRequest;
 	private String timeString;
 	private boolean upDown;
 	private int elevatorNumber;
@@ -114,7 +115,12 @@ public class Event {
 		
 		// last bytes correspond to time
 		// convert timestring (in the form "yyyy/MM/dd HH:mm:ss") to bytes
-		eventDataBaos.write(e.getTimeString().getBytes());
+		try {
+			eventDataBaos.write(e.getTimeString().getBytes());
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		return eventDataBaos.toByteArray();
 	}
@@ -138,12 +144,12 @@ public class Event {
 		
 		// last bytes correspond to time
 		// convert timestring (in the form "yyyy/MM/dd HH:mm:ss") to bytes
-		byte timeBytes[50];
-		for(int i = 0; i < eventDataBytes.length-1) {
-			timeBytes[i] = eventDataBytes[i+2];
+		byte[] timeBytes = new byte[100];
+		for(int i = 0; i < eventDataBytes.length-3; i++) {
+			timeBytes[i] = eventDataBytes[i+3];
 		}
 		
-		e.setTimeString(new String(timeBytes));
+		e.setTimeString(new String(timeBytes).trim());
 		
 		return e;
 	}

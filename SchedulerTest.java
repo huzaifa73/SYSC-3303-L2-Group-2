@@ -15,8 +15,8 @@ class SchedulerTest {
 	@Test
 	void testReceiveRequest() {
 		FloorSubsystem floor_subsystem = new FloorSubsystem(scheduler);
-		Elevator elevator = new Elevator(scheduler);
-		scheduler.setup(floor_subsystem, elevator);
+		Elevator elevator = new Elevator(scheduler, 0);
+		scheduler.setup(floor_subsystem);
 		Event event = new Event();
 		scheduler.receiveRequest(event);
 		assertEquals(1, scheduler.getList().size());
@@ -27,8 +27,8 @@ class SchedulerTest {
 	void testReceiveData() {
 		
 		FloorSubsystem floor_subsystem = new FloorSubsystem(scheduler);
-		Elevator elevator = new Elevator(scheduler);
-		scheduler.setup(floor_subsystem, elevator);
+		Elevator elevator = new Elevator(scheduler, 1);
+		scheduler.setup(floor_subsystem);
 		
 		//add event
 		Event event = new Event();

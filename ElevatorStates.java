@@ -5,18 +5,18 @@ package pack;
  * @author Blake, Hovish
  *
  *
- * State 0: Initial State
+ * IdleState: Initial State
  * There is currently No Task
  * The elevator is not moving
  * Requests tasks from scheduler
  *
- * State 1:
+ * moveState:
  * There is a task
  * The elevator is currently not on the target floor
  * Moves to target floor
  * Checks if a new task takes priority
  *
- * State 2:
+ * destinationState:
  * There is a task
  * The elevator is on the target floor
  * Completes the task
@@ -24,8 +24,8 @@ package pack;
  */
 public enum ElevatorStates {
 	
-	State0, 
-	State1, 
-	State2, 
+	idleState, 
+	moveState, 
+	destinationState, 
 
 }

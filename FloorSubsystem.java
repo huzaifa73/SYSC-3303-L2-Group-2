@@ -16,8 +16,6 @@ import javax.naming.directory.InvalidAttributesException;
 
 /**
 Floor Subsystem is a class that could make requests for elevators events
-
-
 @author Cameron Maccoll, Huzaifa Mazhar
 @version 1.0
 @date February 6th 2020 
@@ -43,7 +41,12 @@ public class FloorSubsystem implements Runnable{
 	 * @param requestEvents The file from which to read the list of requests
 	 */
 	public FloorSubsystem(Scheduler scheduler, File requestEvents) {   
-	
+		try {
+			sendSocket = new DatagramSocket();
+			//Took this out of the loop... putting it in constructor instead.
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 		this.scheduler = scheduler;     
 		this.requestEvents = requestEvents;
 	}
@@ -108,7 +111,8 @@ public class FloorSubsystem implements Runnable{
 	public void run() {
 		
 		try {
-			sendSocket = new DatagramSocket();
+			//sendSocket = new DatagramSocket();
+			//Took this out of the loop... putting it in constructor instead.
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
@@ -142,7 +146,7 @@ public class FloorSubsystem implements Runnable{
 
 			//Set the time before sending
 			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-    			LocalDateTime now = LocalDateTime.now();
+    		LocalDateTime now = LocalDateTime.now();
 			eventToSend.setTimeString(dtf.format(now));
 			
 			// Load sendpacket with event data
@@ -164,7 +168,7 @@ public class FloorSubsystem implements Runnable{
 			}
 		}
 		
-		sendSocket.close;
+		sendSocket.close();
 	}
 	
 	private void printWrapper(String msg) {

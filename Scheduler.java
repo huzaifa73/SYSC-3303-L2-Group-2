@@ -1,10 +1,11 @@
 package pack;
 import java.io.IOException;
-import java.lang.module.ModuleDescriptor.Provides;
+
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -31,9 +32,9 @@ class Scheduler implements Runnable{
     DatagramSocket sendSocket, receiveSocket;
     DatagramPacket sendPacket, sendPacketFloor, recievePacket;
     
-    private ArrayList<ElevatorInterface> elevatorInterfacesList; //TODO
+    private ArrayList<ElevatorInterface> elevatorInterfacesList = new ArrayList<ElevatorInterface>(); //TODO
     
-    private ArrayList<LinkedList<Event>> elevatorQueues; 
+    private ArrayList<LinkedList<Event>> elevatorQueues = new ArrayList<LinkedList<Event>>(); ; 
     
     //private LinkedList<Event> elevatorEventList;
 	
@@ -46,8 +47,8 @@ class Scheduler implements Runnable{
     
     private schedulerState state;
     private int elevatorNumber = 4;
-    private int portElevator = 2000;
-    private volatile static boolean isfloorRequest;
+    private int portElevator = 69;
+    //private boolean isfloorRequest;
 	
     //State Machine for scheduler
     //State 0: event list is empty
@@ -78,7 +79,7 @@ class Scheduler implements Runnable{
     }
     
     /**
-     * Method: Recieves a Packet 
+     * Method: Receives a Packet 
      */
     private void recieve() {
     	
@@ -111,9 +112,6 @@ class Scheduler implements Runnable{
        //call Event function rebuildEvent that will convert the byte into a Event object
        currentEvent = Event.rebuildEvent(data); //current Event being handled
        
-       //Method to figure out if it's from the elevator or the floorsubsystem
-       isfloorRequest = Event.getFloorRequest(); //*******UPDATE WITH NEW CLASS
-       
        schedulingAlgorithm(); //Handle how the recieved event will be used
     }
     
@@ -124,8 +122,13 @@ class Scheduler implements Runnable{
     private void sendPacket(int elevatorIndex) {
     	
     	Event eventPeeked = (elevatorQueues.get(elevatorIndex)).peek();
-        byte msg[] = Event.builtByteArray(eventPeeked);
-        sendPacket =  new DatagramPacket(msg, msg.length,InetAddress.getLocalHost(),elevatorIndex+2000);
+        byte msg[] = Event.buildByteArray(eventPeeked);
+        try {
+			sendPacket =  new DatagramPacket(msg, msg.length,InetAddress.getLocalHost(),elevatorIndex+2000);
+		} catch (UnknownHostException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
         try{
             sendSocket.send(sendPacket);
@@ -142,9 +145,18 @@ class Scheduler implements Runnable{
      */
     private void setUpElevatorQueues() {
     	
+    	
+    	ElevatorInterface eleInt = null;
+    	
     	for (int i = 0; i < elevatorNumber ; i++) {
+    		Thread eleInterface;
     		elevatorQueues.add(new LinkedList<Event>());
-    		elevatorInterfacesList.add(new ElevatorInterface(portElevator+i, i)); //
+    		eleInt = new ElevatorInterface(portElevator+i, i, this);
+    		elevatorInterfacesList.add(eleInt);
+    		//printWrapper("Setup Elevator Interface ID: " + eleInt);
+    		eleInterface = new Thread(this, "eleInterface");
+    		eleInterface.start();
+ 
     	}
 		
 	}
@@ -154,7 +166,7 @@ class Scheduler implements Runnable{
      */
     private void schedulingAlgorithm() {
     	
-    	if (!isFloorRequest) { //Elevator request
+    	if (!currentEvent.isFloorRequest) { //Elevator request
     		
     		int currentElevator = currentEvent.getElevatorNumber();
     		LinkedList<Event> tempEle = new LinkedList<>();
@@ -164,7 +176,7 @@ class Scheduler implements Runnable{
     	}
     	else { //Floor Request
     		boolean eventDirection = currentEvent.getUpDown();
-        	MotorState stateDirection;
+        	MotorState stateDirection = null;
         	if (eventDirection) {
         		stateDirection = MotorState.UP;
         	}
@@ -173,9 +185,9 @@ class Scheduler implements Runnable{
         	}
         	int personFloor = currentEvent.getCurrentFloor();
         	Elevator bestElevator;
-        	ArrayList<Integer> floorDifferences;
-        	ArrayList<MotorState> states;
-        	ArrayList<Integer> correctDirection; //Indexes of the elevators in the correct Direction
+        	ArrayList<Integer> floorDifferences = null;
+        	ArrayList<MotorState> states = null;
+        	ArrayList<Integer> correctDirection = null; //Indexes of the elevators in the correct Direction
         	
         	//Iterates through the ElevatorInterfaces and retrieves floor differences and MotorStates for each Elevator
         	for(ElevatorInterface elevatorInt: elevatorInterfacesList ) {
@@ -199,7 +211,7 @@ class Scheduler implements Runnable{
         	
         	//Chooses the Elevator closest to the Floor
         	int minimum = 8;
-        	int minimum_index;
+        	int minimum_index = 0;
         	for(int i = 0; i<4; i++){
         	    if((floorDifferences.get(i)< minimum)&& (correctDirection.contains(i))){
         	        minimum = floorDifferences.get(i);
@@ -223,18 +235,30 @@ class Scheduler implements Runnable{
      * @param tempEle
      */
 	private void elevatorScheduler(LinkedList<Event> tempEle, int elevatorID) {
-	
+		//JX: ok... I have no clue why we are using a temp list that's passed in...
 		tempEle.add(currentEvent);
 		
+		if(tempEle.size() < 2) {
+			
+			printWrapper("Only Task: No need to sort");
+		}
 		
 		//if the elevator is going down then sort the list in ascending order
-		if(currentEvent.getUpDown()){
-			Collections.sort(tempEle, Comparator.comparing(Event::getTargetFloor));
+		else if(currentEvent.getUpDown()){
+			if(tempEle == null) {
+				printWrapper("tempEle is NULL !!! ERROR");
+			}else if(Comparator.comparing(Event::getTargetFloor) == null){
+				printWrapper("The other thing is NULL !!! ERROR");
+			}else {
+				//the list is empty at the beginning isn't it...
+			Comparator<Event> eventComparator = Comparator.comparingInt(Event::getTargetFloor);
+			Collections.sort(tempEle, eventComparator);
+			}
 		}
 		
 		//if the elevator is going down then sort the list in descending order
 		else if(!currentEvent.getUpDown()){
-			Collections.sort(tempEle, Comparator.comparing(Event::getTargetFloor).reversed());
+			Collections.sort(tempEle, Comparator.comparingInt(Event::getTargetFloor).reversed());
 		}
 		
 		sendPacket(elevatorID);
@@ -244,9 +268,8 @@ class Scheduler implements Runnable{
 	}
 
 	//Needs an additional setup method
-    public void setup(FloorSubsystem floorSubsystem, Elevator elevator) {
+    public void setup(FloorSubsystem floorSubsystem) {
     	this.floorSubsystem = floorSubsystem;
-    	this.elevator = elevator;
     }
     
     /**
@@ -350,6 +373,7 @@ class Scheduler implements Runnable{
     public void run()
     {
         while(true) {
+        	recieve();
         	printList();
 
             try {
