@@ -120,17 +120,19 @@ class Scheduler implements Runnable{
      * Method: Send Packet to Elevators
      */
     private void sendPacket(int elevatorIndex) {
-    	
+    	printWrapper("About to send packet to elevator 1: " + elevatorIndex);
     	Event eventPeeked = (elevatorQueues.get(elevatorIndex)).peek();
         byte msg[] = Event.buildByteArray(eventPeeked);
         try {
-			sendPacket =  new DatagramPacket(msg, msg.length,InetAddress.getLocalHost(),elevatorIndex+2000);
+			sendPacket =  new DatagramPacket(msg, msg.length,InetAddress.getLocalHost(),elevatorIndex+portElevator);
+			printWrapper("About to send packet to elevator 2: " + elevatorIndex + " msg: " + msg);
 		} catch (UnknownHostException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 
         try{
+        	printWrapper("About to send packet to elevator 3 : " + elevatorIndex + " msg: " + msg);
             sendSocket.send(sendPacket);
         }catch(IOException e){
             e.printStackTrace();
@@ -149,12 +151,13 @@ class Scheduler implements Runnable{
     	ElevatorInterface eleInt = null;
     	
     	for (int i = 0; i < elevatorNumber ; i++) {
+    		printWrapper("Making an elevator interface");
     		Thread eleInterface;
     		elevatorQueues.add(new LinkedList<Event>());
     		eleInt = new ElevatorInterface(portElevator+i, i, this);
     		elevatorInterfacesList.add(eleInt);
     		//printWrapper("Setup Elevator Interface ID: " + eleInt);
-    		eleInterface = new Thread(this, "eleInterface");
+    		eleInterface = new Thread(eleInt, "eleInterface");
     		eleInterface.start();
  
     	}
@@ -251,14 +254,29 @@ class Scheduler implements Runnable{
 				printWrapper("The other thing is NULL !!! ERROR");
 			}else {
 				//the list is empty at the beginning isn't it...
+				//
+				//
+				//
+			printWrapper("Before compare: tempEle size = " + tempEle.size());
+			
+			//
+			//
 			Comparator<Event> eventComparator = Comparator.comparingInt(Event::getTargetFloor);
-			Collections.sort(tempEle, eventComparator);
+			//forget sorting for now...
+			//Collections.sort(tempEle, eventComparator);
 			}
 		}
 		
 		//if the elevator is going down then sort the list in descending order
 		else if(!currentEvent.getUpDown()){
-			Collections.sort(tempEle, Comparator.comparingInt(Event::getTargetFloor).reversed());
+			//the list is empty at the beginning isn't it...
+			//
+			//
+			//
+		printWrapper("Before compare 2: tempEle size = " + tempEle.size());
+		
+		//forget sorting for now...
+			//Collections.sort(tempEle, Comparator.comparingInt(Event::getTargetFloor).reversed());
 		}
 		
 		sendPacket(elevatorID);
