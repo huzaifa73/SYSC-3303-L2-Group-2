@@ -82,6 +82,34 @@ class Elevator implements Runnable{
         oldReceivedInfo = new Event();
 
     }
+	
+    
+    /**
+     * Create a new Elevator without the scheduler parameter
+     * 
+     * @param ID : The ID used to identify the elevator by the components of the Elevator System.
+     */
+    public Elevator(int ID) 
+    {
+        doorOpen = false;
+        motorState = MotorState.STOPPED; //constructs with it being stopped
+        state = ElevatorStates.idleState; //Initially the Elevator is idle
+        
+        systemError = SystemError.NO_ERROR; //Constructs the elevator with no errors.
+        elevator_activated = true; // Activates the elevator as soon as it is constructed.
+        door_stuck = false; // door not stuck.
+        
+        //elevatorLamps = new ArrayList();
+        //statusDirection = new ArrayList();
+        this.id = ID; //Sets the ID
+        this.currentFloor = 1;
+        this.targetFloor = -1;
+        tempTargetFloor = -1;
+        sendingInfo = new Event();
+        //newReceivedInfo = new Event();
+        oldReceivedInfo = new Event();
+
+    }
     
     /**
      * Deals with the Case when there is a hard fault in the system when the Elevator is Stucked between 2 floors.
