@@ -175,6 +175,14 @@ class Scheduler implements Runnable{
     		int currentElevator = currentEvent.getElevatorNumber();
     		LinkedList<Event> tempEle = new LinkedList<>();
         	tempEle = (elevatorQueues.get(currentElevator));
+		
+		//Removes the last event, if it's the same target floor that the elevator is on.
+        	//This means the event is complete!
+        	if(tempEle.peek().getTargetFloor() == currentEvent.getCurrentFloor()) {
+        		printWrapper("Completed Floor Request");
+        		tempEle.pop();
+        	}
+		
     		elevatorScheduler(tempEle, currentElevator, currentEvent);
     		
     	}
