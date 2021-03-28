@@ -14,9 +14,10 @@ import java.time.LocalDateTime;
 
 class Elevator implements Runnable{
 	private Scheduler scheduler;
-    private int id;
+    private int id; //id of the elevator
     //private ArrayList<String> statusDirection;
     
+    //set of fields to store the events for the elevator.		
     private Event newReceivedInfo;
     private Event oldReceivedInfo;
     private Event sendingInfo;
@@ -24,9 +25,9 @@ class Elevator implements Runnable{
     private final long averageDoorClosing = 939000000; //average time taken to close a door.
     private final long averageFloorMoving = 950000000; //average time taken to move between two floors.
     
-    private SystemError systemError;
+    private SystemError systemError; //Field Storing the event error status.
     //private ArrayList<Boolean> elevatorLamps;
-    private boolean doorOpen;
+    private boolean doorOpen; //boolean to storing if the door is open, true if open, false otherwise
     
     //Keep track of button lamps that are pressed with list //TODO
     
@@ -35,14 +36,17 @@ class Elevator implements Runnable{
     private MotorState previousDirection;
     private ElevatorStates state;
     
+    //fields storing information about the elevator	
     private int currentFloor;
     private int targetFloor;
     private int tempTargetFloor;
     private String timeString;
-    
+	
+
+    //Fields use to store  if a change in state was successful.
     private boolean successIdleState;
     private boolean successMoveState;
-    private boolean successDestinationState;
+    private boolean successDestinationState; 
     
     private boolean elevator_activated; //Elevator Is Available to run or not
     private boolean door_stuck; //Boolean controlling if door is stuck.
@@ -50,16 +54,17 @@ class Elevator implements Runnable{
 
     
     /**
-     * Create a new Elevator with the assigned Scheduler
+     * Create a new Elevator with the assigned Scheduler, Constructor.
      * 
      * @param scheduler The scheduler object to be used for this elevator
+     * @param ID : The ID used to identify the elevator by the components of the Elevator System.
      */
     public Elevator(Scheduler scheduler, int ID) 
     {
         this.scheduler = scheduler;
         doorOpen = false;
-        motorState = MotorState.STOPPED;
-        state = ElevatorStates.idleState;
+        motorState = MotorState.STOPPED; //constructs with it being stopped
+        state = ElevatorStates.idleState; //Initially the Elevator is idle
         
         systemError = SystemError.NO_ERROR; //Constructs the elevator with no errors.
         elevator_activated = true; // Activates the elevator as soon as it is constructed.
@@ -67,7 +72,7 @@ class Elevator implements Runnable{
         
         //elevatorLamps = new ArrayList();
         //statusDirection = new ArrayList();
-        this.id = ID;
+        this.id = ID; //Sets the ID
         this.currentFloor = 1;
         this.targetFloor = -1;
         tempTargetFloor = -1;
@@ -78,7 +83,7 @@ class Elevator implements Runnable{
     }
     
     /**
-	* Deals with the Case when there is a hard fault in the system when the Elevator is Stucked between 2 floors.
+     * Deals with the Case when there is a hard fault in the system when the Elevator is Stucked between 2 floors.
      * @return 
 	*/
 	public void elevator_hard_fault(){
@@ -88,7 +93,7 @@ class Elevator implements Runnable{
 			
 			elevator_activated =false; //turns of the elevator from the system
 			System.out.println("Elevator"+ id +"is Stuck between floors");
-			System.out.println("Elevator is Stucked between floor: "+ currentFloor +" and "+ floorstuck());
+			System.out.println("Elevator is Stucked between floor: "+ currentFloor +" and "+ floorstuck()); 
 		}
 	}
 	
@@ -98,7 +103,7 @@ class Elevator implements Runnable{
 	public void elevator_soft_fault(){
 
 		//Checking if its an error
-		if(systemError == SystemError.DOOR_FAULT){
+		if(systemError == SystemError.DOOR_FAULT){ 
 
 			//tries to close the door 5 times
 			for(int i=0;i<5;i++){
@@ -108,7 +113,7 @@ class Elevator implements Runnable{
 				printWrapper("Door is closing...");
 				
 				try {
-					Thread.sleep(9390/10);
+					Thread.sleep(9390/10);// Makes the code faster for testing, change for final submission.
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -136,16 +141,20 @@ class Elevator implements Runnable{
 		*/
 	private int floorstuck(){
 		
-			if(previousDirection == MotorState.UP){
+			if(previousDirection == MotorState.UP){ //going up
+				motorState = MotorState.STUCK; 
+				return (currentFloor+1); //returns the maximum floor that the elevator might be stuck on.			
+			}else if(previousDirection == MotorState.DOWN){ //going down
 				motorState = MotorState.STUCK;
-				return (currentFloor+1);			
-			}else if(previousDirection == MotorState.DOWN){
-				motorState = MotorState.STUCK;
-				return (currentFloor-1);	
+				return (currentFloor-1); //returns the maximum floor that the elevator might be stuck on.	
 			}
 			return -1;
 		}
 	
+	/**
+	* Getter method used to know if the elevator is activated.
+	* @return true if elevator can be used, false otherwise.
+	*/
 	public boolean getElevatorActivation(){
 		return elevator_activated;
 	}
@@ -217,33 +226,52 @@ class Elevator implements Runnable{
     }
     
     //Getters for testing
+    /**
+    *@return the motorstate.
+    *
+    */
     public MotorState getMotorState(){
-		return this.motorState;
-	}
+    	return this.motorState;
+    }
+    
+     
+    /**
+    *@return the time.
+    *
+    */	
+    public String getTimeString(){
+	return this.timeString;
+    }
 	
-	public String getTimeString(){
-		return this.timeString;
-	}
-
-	public int getTargetFloor(){
-		return this.targetFloor;
-	}
-
-	public int getCurrentFloor(){
-		return this.currentFloor;
-	}
+    /**
+    *@return the target floor.
+    *
+    */
+    public int getTargetFloor(){
+	return this.targetFloor;
+    }
+     
+    /**
+    *@return the current floor of the elevator.
+    */	
+    public int getCurrentFloor(){
+	return this.currentFloor;
+     }
+     
+     /**
+     *@return the id of the elevator
+     */	
+     public int getID() {  
+	return id;
+      }
 	
-	public int getID() {  
-		return id;
-	}
+     public Event getEvent() {
+	return sendingInfo;
+      }
 	
-	public Event getEvent() {
-		return sendingInfo;
-	}
-	
-	public SystemError getSystemError() {
-		return systemError;
-	}
+      public SystemError getSystemError() {
+	return systemError;
+      }
     
     /**
      * Continually request the Scheduler for a new Event and process it using the state machine
@@ -328,8 +356,8 @@ class Elevator implements Runnable{
 					
 					printWrapper("going up...");
 					doorOpen = false;
-					motorState = motorState.UP;
-					previousDirection = motorState;
+					motorState = motorState.UP; //Sets the state to going up
+					previousDirection = motorState; //Stores the previous direction of the elevator.
 					move();
 					
 				}
@@ -364,7 +392,7 @@ class Elevator implements Runnable{
 					previousDirection = motorState;
 					move();
 				}else { //Impossible state
-					printWrapper("State Machine Error: s1");
+					printWrapper("State Machine Error: s1"); 
 				}
 			}
 			break;
@@ -382,7 +410,7 @@ class Elevator implements Runnable{
 					oldReceivedInfo = null;
 					printWrapper("Elevator " + id + " reached target and is stopped on floor: " + currentFloor + " event: " + sendingInfo);
 					try {
-						Thread.sleep(1000);
+						Thread.sleep(1000); 
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -421,7 +449,7 @@ class Elevator implements Runnable{
 					e.printStackTrace();
 				}
 				finaltime = System.nanoTime();//Gets end time After moving up by 1 floor.
-				elapsedtime = finaltime - starttime;
+				elapsedtime = finaltime - starttime; //Computes the amount of time taken to move by 1 floor, repeats for every floor.
 
 				//Actual TRAVEL_Fault	
 				if(elapsedtime>(2 * averageFloorMoving)){ //verifying if the floor is taking too long to move
@@ -449,15 +477,15 @@ class Elevator implements Runnable{
 
 				//Actual TRAVEL_Fault	
 				if(elapsedtime>(2 * averageFloorMoving)){
-									systemError = SystemError.TRAVEL_FAULT;
-									//call  hard error handling method
-									elevator_hard_fault(); 
-									motorState =  MotorState.STUCK;
-				return; //exits the method 
-								}
+					systemError = SystemError.TRAVEL_FAULT;
+					//call  hard error handling method
+					elevator_hard_fault(); //Causes a hard fault if time taken is too big.
+					motorState =  MotorState.STUCK;
+					return; //exits the method 
+				}
 
-				currentFloor--;
-				printWrapper("Elevator " + id + " moved to: " + currentFloor);
+				currentFloor--; //decrements floor since going down.
+				printWrapper("Elevator " + id + " moved to: " + currentFloor); //Prints formatted information.
 			}
 			
 			//Request an event from the scheduler to see if there's an updated one
@@ -476,16 +504,27 @@ class Elevator implements Runnable{
 		
 	}
 	
-	//Getter for test purposes
+	
+	/**
+	*Getter for test purposes used to return the received info that is an event
+	*@return The received Event of the elevator.
+	*/
 	public Event getReceivedInfo() {
-        return newReceivedInfo;
-    }
+        	return newReceivedInfo;
+        }
 	
-	//Get state for test purposes
+	/**
+	*Getter method used to get the state of the elevator.
+	*@return ElevatorStates - The state of the Elevator.
+	*/
 	public ElevatorStates getState(){
-        return this.state;
-    }
-	
+        	return this.state;
+         }
+	 
+	/**
+	*Code used to print the status of the Elevator.
+	*@param - msg that needs to be formatted and printed
+	*/
 	 private void printWrapper(String msg) {
 			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 		    	LocalDateTime now = LocalDateTime.now();
