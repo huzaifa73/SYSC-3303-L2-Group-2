@@ -19,8 +19,8 @@ import java.util.concurrent.ThreadLocalRandom;
  * The Scheduler class implements a State Machine that provides
  * functionality for the Floor subsystem to send the events it processes 
  * from an input file, which can then be passed on to an Elevator requesting new events
- * @author
- * @version 1.00
+ * @author Jerry, Desmond, Hovish
+ * @version 3/27/2021
  */
 
 class Scheduler implements Runnable{
@@ -117,7 +117,7 @@ class Scheduler implements Runnable{
     }
     
 
-	/**
+    /**
      * Method: Send Packet to Elevators
      */
     private void sendPacket(int elevatorIndex) {
