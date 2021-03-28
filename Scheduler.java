@@ -121,19 +121,17 @@ class Scheduler implements Runnable{
      * Method: Send Packet to Elevators
      */
     private void sendPacket(int elevatorIndex) {
-    	printWrapper("About to send packet to elevator 1: " + elevatorIndex);
     	Event eventPeeked = (elevatorQueues.get(elevatorIndex)).peek();
         byte msg[] = Event.buildByteArray(eventPeeked);
         try {
 			sendPacket =  new DatagramPacket(msg, msg.length,InetAddress.getLocalHost(),elevatorIndex+portElevator);
-			printWrapper("About to send packet to elevator 2: " + elevatorIndex + " msg: " + msg);
 		} catch (UnknownHostException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 
         try{
-        	printWrapper("About to send packet to elevator 3 : " + elevatorIndex + " msg: " + msg);
+            printWrapper("About to send packet to elevator : " + elevatorIndex + " event: " + eventPeeked);
             sendSocket.send(sendPacket);
         }catch(IOException e){
             e.printStackTrace();
