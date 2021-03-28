@@ -52,6 +52,7 @@ class Elevator implements Runnable{
     private boolean door_stuck; //Boolean controlling if door is stuck.
 
     private ElevatorInterface eleInt;
+    private boolean softError;
     
     /**
      * Create a new Elevator with the assigned Scheduler, Constructor.
@@ -104,6 +105,7 @@ class Elevator implements Runnable{
 
 		//Checking if its an error
 		if(systemError == SystemError.DOOR_FAULT){ 
+			softError = true;
 
 			//tries to close the door 5 times
 			for(int i=0;i<5;i++){
@@ -272,6 +274,10 @@ class Elevator implements Runnable{
       public SystemError getSystemError() {
 	return systemError;
       }
+	
+	public boolean getSoftError() { 
+    	  return softError;
+      }
     
     /**
      * Continually request the Scheduler for a new Event and process it using the state machine
@@ -301,7 +307,7 @@ class Elevator implements Runnable{
     /**
      * Change the state of the Elevator according to the variables in the system and the current state
      */
-	private void changeState() {
+	public void changeState() {
 	    
 		switch(state) {
 		
@@ -353,7 +359,7 @@ class Elevator implements Runnable{
 						elevator_soft_fault(); //Handles the Door not closing error.
 					}
 					
-					
+					systemError = SystemError.NO_ERROR;
 					printWrapper("going up...");
 					doorOpen = false;
 					motorState = motorState.UP; //Sets the state to going up
@@ -385,7 +391,7 @@ class Elevator implements Runnable{
 					
 					
 					
-					
+					systemError = SystemError.NO_ERROR;
 					printWrapper("going down...");
 					doorOpen = false;
 					motorState = motorState.DOWN;
