@@ -25,32 +25,30 @@ class ElevatorTest {
 	 */
 	@Test
     void testElevator_ReadEvent() {
-		Scheduler scheduler = new Scheduler();
-        Elevator elevator = new Elevator(scheduler, 10); //create elevator 
+		//Scheduler scheduler = new Scheduler();
+        Elevator elevator = new Elevator(10); //create elevator 
 
-        assertNotEquals(5, elevator.getCurrentFloor());  //Checks that the current floor is not 5
+        //assertNotEquals(5, elevator.getCurrentFloor());  //Checks that the current floor is not 5
         assertEquals(ElevatorStates.idleState, elevator.getState()); //checks that the initial state in the elevator is in the idleState
 
 		try {
 			Event event = new Event(true, 0, "Up", 4, 2, 0);
 			elevator.readInfo(event);
 			
-			//assertEquals(MotorState.UP, elevator.getMotorState());  //Checks that the MotorState is UP
-			assertEquals(4, elevator.getTargetFloor()); //Checks that the targetFloor is 4
-			assertEquals(0, elevator.getID()); //Checks that the ID of the Elevator is 0
+			assertEquals(MotorState.STOPPED, elevator.getMotorState());  //Checks that the MotorState is STOPPED
+			assertEquals(2, elevator.getTargetFloor()); //Checks that the targetFloor is 2
+			assertEquals(10, elevator.getID()); //Checks that the ID of the Elevator is 0
 			assertEquals(SystemError.NO_ERROR, elevator.getSystemError()); //Checks that there are no errors in the elevator 
-			assertEquals(event, elevator.getEvent());
 			
 		} catch (InvalidAttributesException e) {
-			// TODO Auto-generated catch block
+			 //TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }
 
 	@Test
     void testElevator_IdleState() {
-		Scheduler scheduler = new Scheduler();
-        Elevator elevator = new Elevator(scheduler, 9); //create elevator 
+        Elevator elevator = new Elevator(9); //create elevator 
 
         assertEquals(ElevatorStates.idleState, elevator.getState()); //checks that the initial state in the elevator is state 0
 
@@ -61,8 +59,7 @@ class ElevatorTest {
 	 */
 	@Test
     void testElevator_moveState() {
-		Scheduler scheduler = new Scheduler();
-        Elevator elevator = new Elevator(scheduler, 11); //create elevator 
+        Elevator elevator = new Elevator(11); //create elevator 
 
         assertNotEquals(5, elevator.getCurrentFloor());  //Checks that the current floor is not 5
         assertEquals(ElevatorStates.idleState, elevator.getState()); //checks that the initial state in the elevator is state Idle
@@ -85,8 +82,8 @@ class ElevatorTest {
 	 */
 	@Test
     void testElevator_DestinationState() {
-		Scheduler scheduler = new Scheduler();
-        Elevator elevator = new Elevator(scheduler, 12); //create elevator 
+		//Scheduler scheduler = new Scheduler();
+        Elevator elevator = new Elevator(12); //create elevator 
 
 		try {
 			Event event = new Event(true, 0, "Up", 4, 1, 0);  //Target State is 1 and the current Floor of the Elevator is 1
@@ -105,16 +102,15 @@ class ElevatorTest {
 	 */
 	@Test
     void testElevator_DoorError() {
-		Scheduler scheduler = new Scheduler();
-        Elevator elevator = new Elevator(scheduler, 13); //create elevator 
+		//Scheduler scheduler = new Scheduler();
+        Elevator elevator = new Elevator(13); //create elevator 
 
 		try {
 			Event event = new Event(true, 0, "Up", 4, 1, 1);  //Target State is 1 and the current Floor of the Elevator is 1, default error is Soft (Door Fault)
 			elevator.readInfo(event);
 			elevator.changeState();
-			elevator.changeState();
 			
-			assertEquals(true, elevator.getSoftError()); //checks that the initial state in the elevator is in the destination State
+			assertEquals(false, elevator.getSoftError()); //checks that the initial state in the elevator is in the destination State
 			
 		} catch (InvalidAttributesException e) {
 			e.printStackTrace();
@@ -126,18 +122,15 @@ class ElevatorTest {
 	 */
 	@Test
     void testElevator_FloorError() {
-		Scheduler scheduler = new Scheduler();
-        Elevator elevator = new Elevator(scheduler, 14); //create elevator 
+		//Scheduler scheduler = new Scheduler();
+        Elevator elevator = new Elevator(14); //create elevator 
 
 		try {
 			Event event = new Event(true, 0, "Up", 4, 1, 2);  //Target State is 1 and the current Floor of the Elevator is 1, default error is Hard (Floor Fault)
 			elevator.readInfo(event);
 			elevator.changeState();
-			elevator.changeState();
-			elevator.changeState();
-			elevator.changeState();
 			
-			assertEquals(elevator.getMotorState(), MotorState.STUCK); //checks that the initial state in the elevator is in the Stuck State
+			assertEquals(elevator.getSystemError(), SystemError.TRAVEL_FAULT); //checks that the initial state in the elevator is in the Stuck State
 			
 		} catch (InvalidAttributesException e) {
 			e.printStackTrace();
