@@ -98,7 +98,7 @@ class Scheduler implements Runnable{
 
         //sleep
         try { 
-            Thread.sleep(5000);
+            Thread.sleep(500);
         } catch (InterruptedException e ) {
             e.printStackTrace();
             System.exit(1);
@@ -203,7 +203,7 @@ class Scheduler implements Runnable{
         		int currentEleFloor = elevator.getCurrentFloor(); //int currentFloor
         		
         		//If an elevator is doing nothing, give it a task
-        		if(elevator.getReceivedInfo() == null) {
+        		if(elevator.getReceivedInfo() == null && (elevator.getMotorState()!= MotorState.STUCK)) {
         			LinkedList<Event> tempEle = new LinkedList<>();
                 	tempEle = (elevatorQueues.get(elevator.getID()));
                 	printWrapper("Chose elevator " + elevator.getID());
@@ -222,7 +222,7 @@ class Scheduler implements Runnable{
         	
         	//Iterates through the ArrayList of MotorStates and chooses the Elevators in the correct Direction of the event
         	for(int i=0; i<4;i++){
-        		if (states.get(i) == stateDirection || states.get(i) == MotorState.STOPPED) {
+        		if ((states.get(i) == stateDirection || states.get(i) == MotorState.STOPPED)&& (states.get(i)!= MotorState.STUCK)) {
         			correctDirection.add(i);	
         		}
         	}
@@ -231,7 +231,7 @@ class Scheduler implements Runnable{
         	int minimum = 8;
         	int minimum_index = 0;
         	for(int i = 0; i<4; i++){
-        	    if((floorDifferences.get(i)< minimum)&& (correctDirection.contains(i))){
+        	    if((floorDifferences.get(i)< minimum)&& (correctDirection.contains(i)) && (states.get(i)!= MotorState.STUCK)){
         	        minimum = floorDifferences.get(i);
         	        minimum_index = i;
         	    }
