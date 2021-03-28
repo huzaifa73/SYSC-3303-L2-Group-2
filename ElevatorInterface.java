@@ -6,12 +6,17 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 
-//make a method to 
+/**
+* Class is the communication between the elevator and th scheduler
+* This class will act as an intermediary between elevator and schedular, need 2 sockets and packets (send and receive)
+* By Huzaifa
+* @version 3/27/2021
+*/
 
 public class ElevatorInterface implements Runnable{
 	
 	
-//this class will act as an intermediary between elevator and schedular, need 2 sockets and packets (send and receive)
+
 	DatagramPacket sendPacket, receivePacket;
 	DatagramSocket sendSocket, receiveSocket;
 	Elevator elle; //elevator object
