@@ -49,7 +49,7 @@ public class ElevatorInterface implements Runnable{
 		
 		this.port = port; 
 		this.elevatorID = elevatorID; 
-		
+		elle.setElevatorInterface(this);
 	}
 	
 	//receive information from elevator, send to schedular
