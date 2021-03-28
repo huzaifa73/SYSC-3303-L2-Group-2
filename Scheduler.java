@@ -176,7 +176,7 @@ class Scheduler implements Runnable{
 		
 		//Removes the last event, if it's the same target floor that the elevator is on.
         	//This means the event is complete!
-        	if(tempEle.peek().getTargetFloor() == currentEvent.getCurrentFloor()) {
+        	if(tempEle.peek().isFloorRequest && tempEle.peek().getTargetFloor() == currentEvent.getCurrentFloor()) {
         		printWrapper("Completed Floor Request");
         		tempEle.pop();
         	}
