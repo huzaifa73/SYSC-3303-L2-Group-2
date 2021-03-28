@@ -53,12 +53,10 @@ public class ElevatorInterface implements Runnable{
 	}
 	
 	//receive information from elevator, send to schedular
-	public void send() {
+	public void send(Event eventToSend) {
 		
 		//take in event from elevator, process, send to schedular
 		//receive datapacket, validate, call Event.RebuildEvent() to get the event
-		
-		Event eventToSend = elle.getEvent();   //not sure if this should be elevator.intializeinfotosend instead or not, basically the elevator function that sends the data
 		
 		try {
 			schedulerAddress = InetAddress.getLocalHost();
