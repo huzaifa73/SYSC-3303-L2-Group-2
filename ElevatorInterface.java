@@ -133,19 +133,21 @@ public class ElevatorInterface implements Runnable{
 	
 	//run method
 	public void run() {
-		if(elle.getSystemError() == SystemError.NO_ERROR) {
-			receive();
-		}else {
-			//printWrapper("Elevator out of order");
-		}
-		//send();
-		
-		
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		while(true) {
+			if(elle.getSystemError() == SystemError.NO_ERROR) {
+				receive();
+			}else {
+				//printWrapper("Elevator out of order");
+			}
+			//send();
+			
+			
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
