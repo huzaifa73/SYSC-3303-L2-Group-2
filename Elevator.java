@@ -51,7 +51,7 @@ class Elevator implements Runnable{
     private boolean elevator_activated; //Elevator Is Available to run or not
     private boolean door_stuck; //Boolean controlling if door is stuck.
 
-
+    private ElevatorInterface eleInt;
     
     /**
      * Create a new Elevator with the assigned Scheduler, Constructor.
@@ -415,6 +415,8 @@ class Elevator implements Runnable{
 						e.printStackTrace();
 					}
 					//sendEvent();
+					sendingInfo = new Event(sendingInfo);
+					eleInt.send(sendingInfo);
 					state = state.idleState;				
 				}
 			}
@@ -504,6 +506,11 @@ class Elevator implements Runnable{
 		
 	}
 	
+	
+	//sets the elevator interface
+    	public void setElevatorInterface(ElevatorInterface eleInt) {
+    		this.eleInt = eleInt;
+    	}
 	
 	/**
 	*Getter for test purposes used to return the received info that is an event
