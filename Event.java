@@ -1,6 +1,8 @@
 /**
  * The Event class to model the request events triggered by floor & elevator buttons
  * in the ElevatorSystem
+ * By Cam, Jerry
+ * @version 3/27/2021
  */
 
 package pack;
