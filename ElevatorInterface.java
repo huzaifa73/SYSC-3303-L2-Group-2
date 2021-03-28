@@ -80,7 +80,6 @@ public class ElevatorInterface implements Runnable{
 
 		}
 		
-		sendSocket.close();
 		
 		
 	}
@@ -122,7 +121,6 @@ public class ElevatorInterface implements Runnable{
            
            elle.readInfo(eventToSend);
            
-           receiveSocket.close();
            
 
 		
