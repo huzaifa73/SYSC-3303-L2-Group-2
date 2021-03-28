@@ -416,6 +416,7 @@ class Elevator implements Runnable{
 					}
 					//sendEvent();
 					sendingInfo = new Event(sendingInfo);
+					sendingInfo.setCurrentFloor(currentFloor);
 					eleInt.send(sendingInfo);
 					state = state.idleState;				
 				}
