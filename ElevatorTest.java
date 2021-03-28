@@ -17,18 +17,14 @@ import org.junit.jupiter.api.Test;
  */
 class ElevatorTest {
 	
-	//Elevator elevator = new Elevator(scheduler, 0);
-	//Event event;
 	
 	/**
 	 * Test that the Elevator State machine  is in the idleState 
 	 */
 	@Test
     void testElevator_ReadEvent() {
-		//Scheduler scheduler = new Scheduler();
         Elevator elevator = new Elevator(10); //create elevator 
 
-        //assertNotEquals(5, elevator.getCurrentFloor());  //Checks that the current floor is not 5
         assertEquals(ElevatorStates.idleState, elevator.getState()); //checks that the initial state in the elevator is in the idleState
 
 		try {
@@ -37,7 +33,7 @@ class ElevatorTest {
 			
 			assertEquals(MotorState.STOPPED, elevator.getMotorState());  //Checks that the MotorState is STOPPED
 			assertEquals(2, elevator.getTargetFloor()); //Checks that the targetFloor is 2
-			assertEquals(10, elevator.getID()); //Checks that the ID of the Elevator is 0
+			assertEquals(10, elevator.getID()); //Checks that the ID of the Elevator is 10
 			assertEquals(SystemError.NO_ERROR, elevator.getSystemError()); //Checks that there are no errors in the elevator 
 			
 		} catch (InvalidAttributesException e) {
@@ -69,7 +65,7 @@ class ElevatorTest {
 			elevator.readInfo(event);
 			elevator.changeState();
 			
-			assertEquals(ElevatorStates.moveState, elevator.getState()); //checks that the initial state in the elevator is in the moveState
+			assertEquals(ElevatorStates.moveState, elevator.getState()); //checks that the elevator state is in the moveState
 			
 		} catch (InvalidAttributesException e) {
 			// TODO Auto-generated catch block
@@ -82,7 +78,6 @@ class ElevatorTest {
 	 */
 	@Test
     void testElevator_DestinationState() {
-		//Scheduler scheduler = new Scheduler();
         Elevator elevator = new Elevator(12); //create elevator 
 
 		try {
@@ -90,7 +85,7 @@ class ElevatorTest {
 			elevator.readInfo(event);
 			elevator.changeState();
 			
-			assertEquals(ElevatorStates.destinationState, elevator.getState()); //checks that the initial state in the elevator is in the destination State
+			assertEquals(ElevatorStates.destinationState, elevator.getState()); //checks that the elevator is in the destination State
 			
 		} catch (InvalidAttributesException e) {
 			e.printStackTrace();
@@ -102,7 +97,6 @@ class ElevatorTest {
 	 */
 	@Test
     void testElevator_DoorError() {
-		//Scheduler scheduler = new Scheduler();
         Elevator elevator = new Elevator(13); //create elevator 
 
 		try {
@@ -110,7 +104,7 @@ class ElevatorTest {
 			elevator.readInfo(event);
 			elevator.changeState();
 			
-			assertEquals(false, elevator.getSoftError()); //checks that the initial state in the elevator is in the destination State
+			assertEquals(elevator.getSystemError(), SystemError.DOOR_FAULT); //Elevator's error type should be DOOR_Fault
 			
 		} catch (InvalidAttributesException e) {
 			e.printStackTrace();
@@ -122,7 +116,6 @@ class ElevatorTest {
 	 */
 	@Test
     void testElevator_FloorError() {
-		//Scheduler scheduler = new Scheduler();
         Elevator elevator = new Elevator(14); //create elevator 
 
 		try {
@@ -130,7 +123,7 @@ class ElevatorTest {
 			elevator.readInfo(event);
 			elevator.changeState();
 			
-			assertEquals(elevator.getSystemError(), SystemError.TRAVEL_FAULT); //checks that the initial state in the elevator is in the Stuck State
+			assertEquals(elevator.getSystemError(), SystemError.TRAVEL_FAULT); //Elevator's error type should be Travel_Fault
 			
 		} catch (InvalidAttributesException e) {
 			e.printStackTrace();
