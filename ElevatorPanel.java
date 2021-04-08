@@ -39,7 +39,7 @@ public class ElevatorPanel extends JFrame implements ActionListener{
 	
 	
 	
-	public ElevatorSystemGui() {
+	public ElevatorPanel() {
 		super("Elevator System");
 		this.setLayout(new GridLayout(1,4));
 
