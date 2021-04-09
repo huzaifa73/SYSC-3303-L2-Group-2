@@ -26,7 +26,6 @@ class Elevator implements Runnable{
     private final long averageFloorMoving = 950000000; //average time taken to move between two floors.
     
     private SystemError systemError; //Field Storing the event error status.
-    //private ArrayList<Boolean> elevatorLamps;
     private boolean doorOpen; //boolean to storing if the door is open, true if open, false otherwise
     
     //Keep track of button lamps that are pressed with list //TODO
@@ -54,6 +53,9 @@ class Elevator implements Runnable{
     private ElevatorInterface eleInt;
     private boolean softError;
     
+    //*****Iteration 5
+    private Boolean elevatorLamps[]; //Array of Elevator lamps 
+    
     /**
      * Create a new Elevator with the assigned Scheduler, Constructor.
      * 
@@ -80,6 +82,9 @@ class Elevator implements Runnable{
         sendingInfo = new Event();
         //newReceivedInfo = new Event();
         oldReceivedInfo = new Event();
+        
+        //****ADDED Iteration 5
+        elevatorLamps = new Boolean[22]; //Initialized default as 22 floors
 
     }
 	
@@ -235,6 +240,8 @@ class Elevator implements Runnable{
     	//Extract  info from DataObject
     	//sendingInfo = data;
     	
+    	this.elevatorLamps = elevatorLamps;
+    	
     	newReceivedInfo = data;
 
     	//currentFloor = data.getCurrentFloor();   
@@ -315,10 +322,6 @@ class Elevator implements Runnable{
     	
         while(systemError != SystemError.TRAVEL_FAULT) {
         	
-        	//readEvent();  //Request an event from the scheduler 
-        	//recieveAndSend();
-        	//printState();
-        	//&& systemError == SystemError.NO_ERROR
         	if(newReceivedInfo != null) {
         		changeState(); //Change the state of the elevator System
         	}
@@ -343,7 +346,6 @@ class Elevator implements Runnable{
 			//Set the motorState to STOPPED  and open the door
 			previousDirection= motorState;
 			motorState = motorState.STOPPED;
-			long starttime = System.nanoTime(); //gets the time for which the door has been opened.
 			doorOpen = true;
 			
 			//Check if we received a task and check the targetFloor 
@@ -367,7 +369,7 @@ class Elevator implements Runnable{
 			if (newReceivedInfo != null) {
 				//Check if targetFloot is greater than currentFloor
 				if (targetFloor != currentFloor && targetFloor > currentFloor) {
-					starttime = System.nanoTime();
+					long starttime = System.nanoTime(); //gets the time for which the door has been opened.
 					printWrapper("Door is closing...");
 					try {
 						Thread.sleep(939);  //initial value: 9390
@@ -397,7 +399,7 @@ class Elevator implements Runnable{
 				}
 				//Check if targetFloor is less than currentFloor
 				else if (targetFloor != currentFloor && targetFloor < currentFloor) {
-					starttime = System.nanoTime();
+					long starttime = System.nanoTime();
 					printWrapper("Door is closing...");
 					try {
 						Thread.sleep(9390/10); //initial value: 9390
@@ -562,6 +564,14 @@ class Elevator implements Runnable{
 	public ElevatorStates getState(){
         	return this.state;
          }
+	
+	/**
+	 * Setter method to change the elevators lamp list
+	 * @param elevatorLamps
+	 */
+	public void setElevatorLamps(Boolean[] elevatorLamps) {
+		this.elevatorLamps = elevatorLamps;
+	}
 	 
 	/**
 	*Code used to print the status of the Elevator.
@@ -582,5 +592,6 @@ class Elevator implements Runnable{
 	 private void printState() {
 		 printWrapper("State: " + state + " \ncurrentFloor: " + currentFloor + " \ntargetFloor: " + targetFloor + "\nnewReceivedInfo: " + newReceivedInfo);
 	 }
+
 	 
 }
