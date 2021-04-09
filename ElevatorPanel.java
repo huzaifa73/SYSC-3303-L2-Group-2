@@ -1,47 +1,114 @@
+/**
+ * 
+ */
 package pack;
+
+import java.awt.*;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.concurrent.ThreadLocalRandom;
-import javax.swing.*;  
-import java.awt.*;
-import java.awt.event.*;
+
+import javax.swing.*;
+
 /**
- * Class to run the elevator system
- * 
- * @author
- * @version 1.00
+ * @author Blake, Hovish, Jerry
+ *
  */
-public class ElevatorPanel extends JFrame implements ActionListener{
+public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 	
+	//Left Section fields
+	private int SIZE = 7;
+	private JButton startButton; //Start Button field
+	private TextField floorTimeInput; //Floor Time input field
+	private TextField doorTimeInput; //Door Time Input Field
+	private JLabel eventCompletion;  //Count of number of completed events
+	private JLabel executionTime; //Execution Time of system
+	private JLabel elevatorSystemTitle;  //Title of GUI Elevator System
+	private JButton fileInputButton; //Button used to upload the file
+	File filename;
+	
+	//Table
 	//Using JButtons because they look nicer and style better
-	private JButton[] elevator1 = new JButton[22];
-	private int e1CurrentFloor = 1;
-	private int e1TargetFloor = 1;
-	private String e1State = "";
+		private JButton[] elevator1 = new JButton[22];
+		private int e1CurrentFloor = 1;
+		private int e1TargetFloor = 1;
+		private String e1State = "";
+		
+		private JButton[] elevator2 = new JButton[22];
+		private int e2CurrentFloor = 1;
+		private int e2TargetFloor = 1;
+		private String e2State = "";
+		
+		private JButton[] elevator3 = new JButton[22];
+		private int e3CurrentFloor = 1;
+		private int e3TargetFloor = 1;
+		private String e3State = "";
+		
+		private JButton[] elevator4 = new JButton[22];
+		private int e4CurrentFloor = 1;
+		private int e4TargetFloor = 1;
+		private String e4State = "";
+		
+		final String TARGET = "TARGET";
+		
+		
+		//Other Fields
+		ElevatorSystem eleSystem;
+		
 	
-	private JButton[] elevator2 = new JButton[22];
-	private int e2CurrentFloor = 1;
-	private int e2TargetFloor = 1;
-	private String e2State = "";
 	
-	private JButton[] elevator3 = new JButton[22];
-	private int e3CurrentFloor = 1;
-	private int e3TargetFloor = 1;
-	private String e3State = "";
-	
-	private JButton[] elevator4 = new JButton[22];
-	private int e4CurrentFloor = 1;
-	private int e4TargetFloor = 1;
-	private String e4State = "";
-	
-	final String TARGET = "TARGET";
-	
-	
-	
-	
-	public ElevatorPanel() {
+	public ElevatorSystemGUI(){
 		super("Elevator System");
-		this.setLayout(new GridLayout(1,4));
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		this.setLayout(new GridLayout(1,2));
+	
+		
+		JPanel fieldPanel = new JPanel(new GridLayout(SIZE, 1));
+		
+		eleSystem = new ElevatorSystem();
+		
+		//LEFT SECTION
+		
+				startButton = new JButton("StartButton");
+				//startButton.addActionListener();
+				startButton.setActionCommand("StartButton");
+				
+				fileInputButton = new JButton("FileInput");
+				
+				fileInputButton.addActionListener((e -> {
+					JFileChooser C = new JFileChooser();
+		            C.showDialog(null,"Choose Event File to Import");
+		            C.setVisible(true);
+		            filename = C.getSelectedFile();
+				}));
+				
+
+				floorTimeInput = new TextField("Please Enter the Avg Floor moving Time");
+				//floorTimeInput.addActionListener();
+				
+				doorTimeInput = new TextField("Please Enter the Avg Door closing Time");
+				//doorTimeInput.addActionListener();
+				
+				executionTime = new JLabel(" ");
+				executionTime.setText("File Execution Time: 0:00");
+				
+				eventCompletion = new JLabel("Completed Events: 0");
+				elevatorSystemTitle = new JLabel("Elevator System: Group 2 - 2021");
+		
+		//Add file input HERE *******
+		fieldPanel.add(elevatorSystemTitle);
+		fieldPanel.add(fileInputButton);
+		fieldPanel.add(floorTimeInput);
+		fieldPanel.add(doorTimeInput);
+		fieldPanel.add(eventCompletion);
+		fieldPanel.add(executionTime);
+		fieldPanel.add(startButton);
+	
+		
+				
+				
+		//Right Section
 
 		JPanel buttonPanel = new JPanel(new GridLayout(22, 4));
 
@@ -104,18 +171,20 @@ public class ElevatorPanel extends JFrame implements ActionListener{
 		setTargetFloor(4, 2);
 		
 
+		this.add(fieldPanel);
 		this.add(buttonPanel);
 		
-		this.setSize(600, 1000);
+		this.setSize(800, 600);
 		this.setVisible(true);
+
 	}
 	
 	public static void main(String[] args) {
-		new ElevatorSystemGui();
+		new ElevatorSystemGUI();
 	}
 	
-
-	public void setElevatorFloor(int ElevatorNum, int Floor) {
+	
+public void setElevatorFloor(int ElevatorNum, int Floor) {
 		
 		switch(ElevatorNum) {
 			case 1:
@@ -241,9 +310,17 @@ public class ElevatorPanel extends JFrame implements ActionListener{
 		System.out.println("CAN CALL THIS FUNCTION");
 	}
 
+
 	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
+	public void handleElevatorSystemUpdate(ElevatorSystemEvent e) throws InterruptedException {
+		//Handle event information
 		
+		
+		String executionTimeString = " ";
+		String eventCompletionCount = " ";
+		
+		eventCompletion.setText(eventCompletionCount);
+		executionTime.setText(executionTimeString);
 	}
+	
 }
