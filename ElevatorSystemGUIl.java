@@ -65,6 +65,9 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 	
 		
 		JPanel fieldPanel = new JPanel(new GridLayout(SIZE, 1));
+		fieldPanel.setBorder(BorderFactory.createCompoundBorder(
+			    BorderFactory.createLoweredBevelBorder(),
+			    BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 		
 		eleSystem = new ElevatorSystem();
 		
@@ -113,12 +116,15 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 		JPanel buttonPanel = new JPanel(new GridLayout(22, 4));
 
 		buttonPanel.setPreferredSize(new Dimension(600,1000));
+		buttonPanel.setBorder(BorderFactory.createCompoundBorder(
+			    BorderFactory.createLoweredBevelBorder(),
+			    BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 		//JButton simFloorsButton = new JButton("Simulate Floor Requests");
-		for(int i = 87; i >= 0; i--) {
+		for(int i = 109; i >= 0; i--) {
 			//The division is the floor 
-			int f = i/4;
+			int f = i/5;
 			//The remainder is the elevator.
-			int r = i % 4;
+			int r = i % 5;
 			JButton temp = new JButton("");
 			//JButton temp = new JButton(String.valueOf(f+1));
 			temp.setPreferredSize(new Dimension(80,80));
@@ -139,6 +145,8 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 				case 3:
 					elevator1[f] = temp;
 					break;
+				case 4:
+					temp.setText(String.valueOf(f));
 				default:
 					//error
 			}
