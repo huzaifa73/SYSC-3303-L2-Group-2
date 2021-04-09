@@ -301,10 +301,40 @@ class Scheduler implements Runnable{
 			Collections.sort(tempEle, Comparator.comparingInt(Event::getTargetFloor).reversed());
 		}
 		
+		sendLamps(tempEle, elevatorID); //Send list of lamps to chosen elevator
 		sendPacket(elevatorID);
 		
 		//The send socket should include the head of the event list in the linkedList of the arrayList containing the Elevator Lists
 
+	}
+	
+         /**
+	 * Method: Creates an array of lamps for each Elevator
+	 * @param tempEle
+	 */
+	public void sendLamps(LinkedList<Event> tempEle, int elevatorID) {
+		
+		ArrayList tempArray = new ArrayList();
+		
+		for (Event e: tempEle) {
+			tempArray.add(e.getTargetFloor());	
+		}
+		
+		Boolean[] tempLamps = new Boolean[23]; //Initialize temp array for lamps
+		tempLamps[0] = false;
+		
+		//Create Boolean list of lamps for elevator
+		for (int i = 0; i < tempArray.size(); i++) {
+			tempLamps[(int) tempArray.get(i)] = true;
+
+		}
+		
+		//Send Boolean list to appropriate elevator
+		for(int j = 0; j <elevatorInterfacesList.size(); j++ ) {
+			if (j == elevatorID) {
+				elevatorInterfacesList.get(j).getElevator().setElevatorLamps(tempLamps);
+			}
+		}	
 	}
 
 	//Needs an additional setup method
