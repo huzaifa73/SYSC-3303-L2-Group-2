@@ -39,7 +39,7 @@ public class Event {
 		this.targetFloor = e.finalDestination;
 		this.finalDestination = e.finalDestination;
 		this.timeString = e.timeString;
-		
+		this.eventError = e.eventError;
 	}
 	
 	/**
