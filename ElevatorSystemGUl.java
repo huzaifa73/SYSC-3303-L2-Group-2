@@ -75,12 +75,18 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 		
 				startButton = new JButton("StartButton");
 				startButton.addActionListener((e -> { //NOTE: only defaults... have not connected to other buttons.
+					
+					String floorTimeString = floorTimeInput.getText().trim();
+					String doorTimeString = doorTimeInput.getText().trim();
+					
+					double floorTime = Double.parseDouble(floorTimeString);
+					double doorTime = Double.parseDouble(doorTimeString);
 
 					//Create threads
 					Thread floor_subsystem, scheduler;
 				
 					//Create Objects
-					Scheduler schedulerObj = new Scheduler(this);
+					Scheduler schedulerObj = new Scheduler(this, floorTime, doorTime);
 					
 					//File FloorInputFile.txt should be stored in directly in the project folder
 					File ioFile = new File("src\\pack\\FloorInputFile.txt");
