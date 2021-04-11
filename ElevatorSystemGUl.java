@@ -94,7 +94,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 					Thread floor_subsystem, scheduler;
 				
 					//Create Objects
-					Scheduler schedulerObj = new Scheduler(this);
+					Scheduler schedulerObj = new Scheduler(this, doorTime, floorTime);
 					
 					//File FloorInputFile.txt should be stored in directly in the project folder
 					File defaultFile = new File("src\\pack\\FloorInputFile.txt");
