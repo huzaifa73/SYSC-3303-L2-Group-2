@@ -248,7 +248,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	 * @param time
 	 */
 	public void setExecutionTime(String time) {
-		executionTime.setText(time);	
+		executionTime.setText("File Execution Time: " + time);	
 	}
 	
 	/**
