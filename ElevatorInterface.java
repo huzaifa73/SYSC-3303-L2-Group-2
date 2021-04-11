@@ -52,6 +52,32 @@ public class ElevatorInterface implements Runnable{
 		elle.setElevatorInterface(this);
 	}
 	
+	public ElevatorInterface(int port, int elevatorID, Scheduler scheduler, ElevatorSystemGUI gui) {
+		
+		Thread elevatorThread;
+		elle = new Elevator(scheduler, elevatorID, gui);
+		
+		//Starts Thread for elevator
+		elevatorThread = new Thread(elle, "Elle-vator"); 
+		elevatorThread.start();
+		try {
+			receiveSocket = new DatagramSocket(port);
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} //instantiate with 23 for schedular port
+		try {
+			sendSocket = new DatagramSocket();
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} //instantiate
+		
+		this.port = port; 
+		this.elevatorID = elevatorID; 
+		elle.setElevatorInterface(this);
+	}
+	
 	//receive information from elevator, send to schedular
 	public void send(Event eventToSend) {
 		
