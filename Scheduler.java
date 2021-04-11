@@ -79,7 +79,7 @@ class Scheduler implements Runnable{
     }
 	
     //Constructs the Scheduler with the GUI as an input
-    public Scheduler(ElevatorSystemGUI gui)
+    public Scheduler(ElevatorSystemGUI gui, double doorTime, double floorTime)
     {
        try {
     	sendSocket = new DatagramSocket();
@@ -94,7 +94,7 @@ class Scheduler implements Runnable{
         elevatorQueues = new ArrayList<LinkedList<Event>>();
    		//elevatorInterfacesList = new ArrayList<ElevatorInterface>();
    	
-   		setUpElevatorQueues(gui);
+   		setUpElevatorQueues(gui, doorTime, floorTime);
   
     }
     
@@ -188,7 +188,7 @@ class Scheduler implements Runnable{
      * Method: Sets up the elevator linkedList depending on Number of elevators
      * Overloaded method, passes in the gui
      */
-    private void setUpElevatorQueues(ElevatorSystemGUI gui) {
+    private void setUpElevatorQueues(ElevatorSystemGUI gui, double doorTime, double floorTime) {
     	
     	
     	ElevatorInterface eleInt = null;
@@ -197,7 +197,7 @@ class Scheduler implements Runnable{
     		printWrapper("Making an elevator interface");
     		Thread eleInterface;
     		elevatorQueues.add(new LinkedList<Event>());
-    		eleInt = new ElevatorInterface(portElevator+i, i, this, gui);
+    		eleInt = new ElevatorInterface(portElevator+i, i, this, gui, doorTime, floorTime);
     		elevatorInterfacesList.add(eleInt);
     		//printWrapper("Setup Elevator Interface ID: " + eleInt);
     		eleInterface = new Thread(eleInt, "eleInterface");

@@ -52,10 +52,10 @@ public class ElevatorInterface implements Runnable{
 		elle.setElevatorInterface(this);
 	}
 	
-	public ElevatorInterface(int port, int elevatorID, Scheduler scheduler, ElevatorSystemGUI gui) {
+	public ElevatorInterface(int port, int elevatorID, Scheduler scheduler, ElevatorSystemGUI gui, double doorTime, double floorTime) {
 		
 		Thread elevatorThread;
-		elle = new Elevator(scheduler, elevatorID, gui);
+		elle = new Elevator(scheduler, elevatorID, gui, doorTime, floorTime);
 		
 		//Starts Thread for elevator
 		elevatorThread = new Thread(elle, "Elle-vator"); 
