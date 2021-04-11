@@ -77,6 +77,26 @@ class Scheduler implements Runnable{
    		setUpElevatorQueues();
   
     }
+	
+    //Constructs the Scheduler with the GUI as an input
+    public Scheduler(ElevatorSystemGUI gui)
+    {
+       try {
+    	sendSocket = new DatagramSocket();
+        	
+        receiveSocket = new DatagramSocket(1999);
+       }catch (SocketException se) {
+    	   se.printStackTrace();
+    	   System.exit(1);
+       }
+       
+        state = schedulerState.emptyState;
+        elevatorQueues = new ArrayList<LinkedList<Event>>();
+   		//elevatorInterfacesList = new ArrayList<ElevatorInterface>();
+   	
+   		setUpElevatorQueues(gui);
+  
+    }
     
     /**
      * Method: Receives a Packet 
@@ -161,7 +181,31 @@ class Scheduler implements Runnable{
  
     	}
 		
-	}
+    }
+	
+	
+    /**
+     * Method: Sets up the elevator linkedList depending on Number of elevators
+     * Overloaded method, passes in the gui
+     */
+    private void setUpElevatorQueues(ElevatorSystemGUI gui) {
+    	
+    	
+    	ElevatorInterface eleInt = null;
+    	
+    	for (int i = 0; i < elevatorNumber ; i++) {
+    		printWrapper("Making an elevator interface");
+    		Thread eleInterface;
+    		elevatorQueues.add(new LinkedList<Event>());
+    		eleInt = new ElevatorInterface(portElevator+i, i, this, gui);
+    		elevatorInterfacesList.add(eleInt);
+    		//printWrapper("Setup Elevator Interface ID: " + eleInt);
+    		eleInterface = new Thread(eleInt, "eleInterface");
+    		eleInterface.start();
+ 
+    	}
+		
+    }
     
     /**
      * Method: Sorts the CurrentEvent towards the correct Elevator event list
