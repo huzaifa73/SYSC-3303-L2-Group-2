@@ -193,21 +193,21 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 		
 		
 		
-		setElevatorFloor(1, 2);
-		setElevatorFloor(2, 8);
-		setElevatorFloor(3, 10);
-		setElevatorFloor(4, 19);
+		//setElevatorFloor(1, 2);
+		//setElevatorFloor(2, 8);
+		//setElevatorFloor(3, 10);
+		//setElevatorFloor(4, 19);
 		
-		setElevatorState(1, "happy");
-		setElevatorState(2, "sad");
-		setElevatorState(3, "broken");
-		setElevatorState(4, "confused");
+		//setElevatorState(1, "happy");
+		//setElevatorState(2, "sad");
+		//setElevatorState(3, "broken");
+		//setElevatorState(4, "confused");
 		
 		
-		setTargetFloor(1, 9);
-		setTargetFloor(2, 15);
-		setTargetFloor(3, 11);
-		setTargetFloor(4, 2);
+		//setTargetFloor(1, 9);
+		//setTargetFloor(2, 15);
+		//setTargetFloor(3, 11);
+		//setTargetFloor(4, 2);
 		
 
 		this.add(fieldPanel);
