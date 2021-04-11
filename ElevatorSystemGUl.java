@@ -25,7 +25,7 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 	private JLabel executionTime; //Execution Time of system
 	private JLabel elevatorSystemTitle;  //Title of GUI Elevator System
 	private JButton fileInputButton; //Button used to upload the file
-	File filename;
+	File IOFile;
 	
 	//Table
 	//Using JButtons because they look nicer and style better
@@ -75,13 +75,17 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 		
 				startButton = new JButton("StartButton");
 				startButton.addActionListener((e -> { //NOTE: only defaults... have not connected to other buttons.
-					
+
+					//Convert floor time and door time from String to Double
 					String floorTimeString = floorTimeInput.getText().trim();
 					String doorTimeString = doorTimeInput.getText().trim();
 					
 					double floorTime = Double.parseDouble(floorTimeString);
 					double doorTime = Double.parseDouble(doorTimeString);
-
+					
+					System.out.println("THE FLOOR TIME IS: " + floorTime);
+					System.out.println("THE DOOR TIME IS: " + doorTime);
+					
 					//Create threads
 					Thread floor_subsystem, scheduler;
 				
@@ -89,8 +93,15 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 					Scheduler schedulerObj = new Scheduler(this, floorTime, doorTime);
 					
 					//File FloorInputFile.txt should be stored in directly in the project folder
-					File ioFile = new File("src\\pack\\FloorInputFile.txt");
-					FloorSubsystem floorSubsystem = new FloorSubsystem(schedulerObj, ioFile);
+					File defaultFile = new File("src\\pack\\FloorInputFile.txt");
+					
+					//Check if IOFile is null
+					if (IOFile == null) {
+						IOFile = defaultFile;
+					}
+					
+					System.out.println("THE FILENAME IS: " + IOFile.getName());
+					FloorSubsystem floorSubsystem = new FloorSubsystem(schedulerObj, IOFile); 
 					schedulerObj.setup(floorSubsystem);
 
 					
@@ -110,14 +121,18 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 					JFileChooser C = new JFileChooser();
 		            C.showDialog(null,"Choose Event File to Import");
 		            C.setVisible(true);
-		            filename = C.getSelectedFile();
+		            IOFile = C.getSelectedFile();
+		            
 				}));
 				
 
 				floorTimeInput = new TextField("Please Enter the Avg Floor moving Time");
+				//floorTimeInput.addActionListener(this);
 				//floorTimeInput.addActionListener();
 				
 				doorTimeInput = new TextField("Please Enter the Avg Door closing Time");
+				//doorTimeInput.addActionListener(this);
+				
 				//doorTimeInput.addActionListener();
 				
 				executionTime = new JLabel(" ");
@@ -199,21 +214,21 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 		
 		
 		
-		//setElevatorFloor(1, 2);
-		//setElevatorFloor(2, 8);
-		//setElevatorFloor(3, 10);
-		//setElevatorFloor(4, 19);
+		setElevatorFloor(1, 2);
+		setElevatorFloor(2, 8);
+		setElevatorFloor(3, 10);
+		setElevatorFloor(4, 19);
 		
-		//setElevatorState(1, "happy");
-		//setElevatorState(2, "sad");
-		//setElevatorState(3, "broken");
-		//setElevatorState(4, "confused");
+		setElevatorState(1, "happy");
+		setElevatorState(2, "sad");
+		setElevatorState(3, "broken");
+		setElevatorState(4, "confused");
 		
 		
-		//setTargetFloor(1, 9);
-		//setTargetFloor(2, 15);
-		//setTargetFloor(3, 11);
-		//setTargetFloor(4, 2);
+		setTargetFloor(1, 9);
+		setTargetFloor(2, 15);
+		setTargetFloor(3, 11);
+		setTargetFloor(4, 2);
 		
 
 		this.add(fieldPanel);
