@@ -127,13 +127,15 @@ class Scheduler implements Runnable{
 
        //get data from packet
        data = recievePacket.getData();
-       
 
-       //call Event function rebuildEvent that will convert the byte into a Event object
-       Event currentEvent = Event.rebuildEvent(data); //current Event being handled
-       currentEventQueue.add(currentEvent);
-       printWrapper("Got data from something ... " + currentEvent);
-       //schedulingAlgorithm(); //Handle how the recieved event will be used
+       if(currentEvent.getIsComplete()) {
+    	   printWrapper("Got a completed event: " + currentEvent.getElevatorNumber());
+    	   elevatorQueues.get(currentEvent.getElevatorNumber()).pop();
+       }else {
+           currentEventQueue.add(currentEvent);
+           printWrapper("Got data from something ... " + currentEvent);
+       }
+
     }
     
 
