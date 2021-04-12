@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -52,6 +53,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 		private int e4CurrentFloor = 1;
 		private int e4TargetFloor = 1;
 		private String e4State = "";
+		private Timer timer;
 		
 		final String TARGET = "TARGET";
 		
@@ -76,7 +78,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 		eleSystem = new ElevatorSystem();
 		
 		//LEFT SECTION
-		
+				
 				//Set timer for display
 				//TODO: stop the timer on complete event timer.stop()
 				executionTime = new JLabel(" ");
@@ -92,8 +94,8 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 
 				    }
 				};
-				Timer timer=new Timer(100, countDown);
-		
+				timer=new Timer(100, countDown);
+				
 				startButton = new JButton("StartButton");
 				startButton.addActionListener((e -> { //NOTE: only defaults... have not connected to other buttons.
 
@@ -133,6 +135,9 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 					//Start threads
 					floor_subsystem.start();
 					scheduler.start();
+					
+					//Start timer display
+					timer.start();
 
 				}));
 				
@@ -150,14 +155,22 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 				doorTimeInstruction = new JLabel("Please input the opening/closing time for the doors in seconds below:");
 				
 
-				floorTimeInput = new TextField("9.4");
+				floorTimeInput = new TextField("1");
 				//floorTimeInput.addActionListener(this);
 				//floorTimeInput.addActionListener();
 				
-				doorTimeInput = new TextField("9.1");
+				doorTimeInput = new TextField("1");
 				//doorTimeInput.addActionListener(this);
 				
 				//doorTimeInput.addActionListener();
+				
+
+
+				
+
+				
+
+				
 				
 				
 				eventCompletion = new JLabel("Completed Events: 0");
@@ -382,6 +395,17 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	 */
 	public void testprint() {
 		System.out.println("CAN CALL THIS FUNCTION");
+	}
+	
+	/**
+	 * Method: Test Method
+	 */
+	public void stopTimer() {
+		if(timer != null) {
+			timer.stop();
+		}else {
+			System.out.println("ERROR: timer is null!");
+		}
 	}
 
 	@Override
