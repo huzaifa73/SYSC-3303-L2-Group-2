@@ -158,6 +158,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 					schedulerObj.stopElevatorThreads();
 					//Stop the timer display
 					timer.stop();
+					startButton.setEnabled(false);
 							
 				}));
 				
