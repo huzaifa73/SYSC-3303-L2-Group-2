@@ -579,6 +579,7 @@ class Elevator implements Runnable{
 
 				currentFloor--; //decrements floor since going down.
 				printWrapper("Elevator " + id + " moved to: " + currentFloor); //Prints formatted information.
+				gui.setElevatorFloor(id, currentFloor);
 			}
 			
 			//Request an event from the scheduler to see if there's an updated one
