@@ -22,6 +22,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	//Left Section fields
 	private int SIZE = 9;
 	private JButton startButton; //Start Button field
+	private JButton stopButton; //Stop Button field
 	private JLabel floorTimeInstruction;
 	private JLabel doorTimeInstruction;
 	private TextField floorTimeInput; //Floor Time input field
@@ -61,6 +62,9 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 		
 		//Other Fields
 		ElevatorSystem eleSystem;
+	
+	//Scheduler Object
+	Scheduler schedulerObj;
 		
 	
 	
@@ -128,7 +132,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 					
 
 					//Create Objects
-					Scheduler schedulerObj = new Scheduler(this, doorTime, floorTime, IOFile);
+					schedulerObj = new Scheduler(this, doorTime, floorTime, IOFile);
 					
 					FloorSubsystem floorSubsystem = new FloorSubsystem(schedulerObj, IOFile); 
 					schedulerObj.setup(floorSubsystem);
@@ -145,6 +149,16 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 					//Start timer display
 					timer.start();
 
+				}));
+		
+				//Stop Button actions ***********CHNAGE
+				stopButton = new JButton("Stop");
+				stopButton.addActionListener((e -> {
+					//Stop the Elevator Threads
+					schedulerObj.stopElevatorThreads();
+					//Stop the timer display
+					timer.stop();
+							
 				}));
 				
 				fileInputButton = new JButton("FileInput");
@@ -169,6 +183,15 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 				//doorTimeInput.addActionListener(this);
 				
 				//doorTimeInput.addActionListener();
+		
+				//Added Button Panel ************CHANGE
+				JPanel ButtonPanel = new JPanel(new GridLayout(1, 2));
+				fieldPanel.setBorder(BorderFactory.createCompoundBorder(
+					    BorderFactory.createLoweredBevelBorder(),
+					    BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+				
+				ButtonPanel.add(startButton);
+				ButtonPanel.add(stopButton);
 				
 				eventCompletion = new JLabel("");
 				elevatorSystemTitle = new JLabel("Elevator System: Group 2 - 2021");
@@ -182,7 +205,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 		fieldPanel.add(doorTimeInput);
 		fieldPanel.add(eventCompletion);
 		fieldPanel.add(executionTime);
-		fieldPanel.add(startButton);
+		fieldPanel.add(ButtonPanel);
 	
 		
 				
