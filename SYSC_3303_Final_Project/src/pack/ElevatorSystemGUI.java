@@ -4,6 +4,8 @@
 package pack;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.concurrent.ThreadLocalRandom;
@@ -14,18 +16,20 @@ import javax.swing.*;
  * @author Blake, Hovish, Jerry
  *
  */
-public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
+public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	
 	//Left Section fields
-	private int SIZE = 7;
+	private int SIZE = 9;
 	private JButton startButton; //Start Button field
+	private JLabel floorTimeInstruction;
+	private JLabel doorTimeInstruction;
 	private TextField floorTimeInput; //Floor Time input field
 	private TextField doorTimeInput; //Door Time Input Field
 	private JLabel eventCompletion;  //Count of number of completed events
 	private JLabel executionTime; //Execution Time of system
 	private JLabel elevatorSystemTitle;  //Title of GUI Elevator System
 	private JButton fileInputButton; //Button used to upload the file
-	File filename;
+	File IOFile;
 	
 	//Table
 	//Using JButtons because they look nicer and style better
@@ -76,15 +80,32 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 				startButton = new JButton("StartButton");
 				startButton.addActionListener((e -> { //NOTE: only defaults... have not connected to other buttons.
 
+					//Convert floor time and door time from String to Double
+					String floorTimeString = floorTimeInput.getText().trim();
+					String doorTimeString = doorTimeInput.getText().trim();
+					
+					double floorTime = Double.parseDouble(floorTimeString);
+					double doorTime = Double.parseDouble(doorTimeString);
+					
+					System.out.println("THE FLOOR TIME IS: " + floorTime);
+					System.out.println("THE DOOR TIME IS: " + doorTime);
+					
 					//Create threads
 					Thread floor_subsystem, scheduler;
 				
 					//Create Objects
-					Scheduler schedulerObj = new Scheduler(this);
+					Scheduler schedulerObj = new Scheduler(this, doorTime, floorTime);
 					
 					//File FloorInputFile.txt should be stored in directly in the project folder
-					File ioFile = new File("src\\pack\\FloorInputFile.txt");
-					FloorSubsystem floorSubsystem = new FloorSubsystem(schedulerObj, ioFile);
+					File defaultFile = new File("src\\pack\\FloorInputFile.txt");
+					
+					//Check if IOFile is null
+					if (IOFile == null) {
+						IOFile = defaultFile;
+					}
+					
+					System.out.println("THE FILENAME IS: " + IOFile.getName());
+					FloorSubsystem floorSubsystem = new FloorSubsystem(schedulerObj, IOFile); 
 					schedulerObj.setup(floorSubsystem);
 
 					
@@ -104,14 +125,21 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 					JFileChooser C = new JFileChooser();
 		            C.showDialog(null,"Choose Event File to Import");
 		            C.setVisible(true);
-		            filename = C.getSelectedFile();
+		            IOFile = C.getSelectedFile();
+		            
 				}));
 				
+				floorTimeInstruction = new JLabel("Please input the time to move between floors in seconds below:");
+				doorTimeInstruction = new JLabel("Please input the opening/closing time for the doors in seconds below:");
+				
 
-				floorTimeInput = new TextField("Please Enter the Avg Floor moving Time");
+				floorTimeInput = new TextField("9.4");
+				//floorTimeInput.addActionListener(this);
 				//floorTimeInput.addActionListener();
 				
-				doorTimeInput = new TextField("Please Enter the Avg Door closing Time");
+				doorTimeInput = new TextField("9.1");
+				//doorTimeInput.addActionListener(this);
+				
 				//doorTimeInput.addActionListener();
 				
 				executionTime = new JLabel(" ");
@@ -123,7 +151,9 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 		//Add file input HERE *******
 		fieldPanel.add(elevatorSystemTitle);
 		fieldPanel.add(fileInputButton);
+		fieldPanel.add(floorTimeInstruction);
 		fieldPanel.add(floorTimeInput);
+		fieldPanel.add(doorTimeInstruction);
 		fieldPanel.add(doorTimeInput);
 		fieldPanel.add(eventCompletion);
 		fieldPanel.add(executionTime);
@@ -192,23 +222,6 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 		setElevatorFloor(3, 1);
 		
 		
-		
-//		setElevatorFloor(1, 2);
-//		setElevatorFloor(2, 8);
-//		setElevatorFloor(3, 10);
-//		setElevatorFloor(4, 19);
-//		
-//		setElevatorState(1, "happy");
-//		setElevatorState(2, "sad");
-//		setElevatorState(3, "broken");
-//		setElevatorState(4, "confused");
-//		
-//		
-//		setTargetFloor(1, 9);
-//		setTargetFloor(2, 15);
-//		setTargetFloor(3, 11);
-//		setTargetFloor(4, 2);
-		
 
 		this.add(fieldPanel);
 		this.add(buttonPanel);
@@ -222,10 +235,30 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 		new ElevatorSystemGUI();
 	}
 	
+	/**
+	 * Method: Updates the number of completed events
+	 * @param numberEvents
+	 */
+	public void setCompletedEvents(int numberEvents) {
+		eventCompletion.setText("Completed Events: " + String.valueOf(numberEvents));
+	}
 	
-public void setElevatorFloor(int ElevatorNum, int Floor) {
+	/**
+	 * Method: Updates the execution Time of the Elevator System
+	 * @param time
+	 */
+	public void setExecutionTime(String time) {
+		executionTime.setText("File Execution Time: " + time);	
+	}
+	
+	/**
+	 * Method: Update the elevator floor for each Elevator
+	 * @param ElevatorNum
+	 * @param Floor
+	 */
+	public void setElevatorFloor(int ElevatorNum, int Floor) {
 		
-		switch(ElevatorNum+1) {
+		switch(ElevatorNum + 1) {
 			case 1:
 				elevator1[e1CurrentFloor -1].setEnabled(false);
 				elevator1[e1CurrentFloor -1].setText("");
@@ -263,10 +296,14 @@ public void setElevatorFloor(int ElevatorNum, int Floor) {
 			}
 	}
 	
-	
+	/**
+	 * MethodL Update the Target floor for each Elevator
+	 * @param ElevatorNum
+	 * @param Floor
+	 */
 	public void setTargetFloor(int ElevatorNum, int Floor) {
 
-		switch(ElevatorNum+1) {
+		switch(ElevatorNum + 1) {
 			case 1:
 				elevator1[e1TargetFloor -1].setText("");
 				e1TargetFloor = Floor;
@@ -293,9 +330,14 @@ public void setElevatorFloor(int ElevatorNum, int Floor) {
 		}
 	}
 	
+	/**
+	 * Method: Update the elevator state for each elevator
+	 * @param ElevatorNum
+	 * @param state
+	 */
 	public void setElevatorState(int ElevatorNum, String state) {
 		
-		switch(ElevatorNum+1) {
+		switch(ElevatorNum + 1) {
 			case 1:
 				e1State = state;
 				elevator1[e1CurrentFloor -1].setText(e1State);
@@ -320,46 +362,18 @@ public void setElevatorFloor(int ElevatorNum, int Floor) {
 	}
 	
 	
-//	public static void main(String[] args) {
-//		
-//		//Create threads
-//		Thread floor_subsystem, scheduler;
-//		
-//		//Create Objects
-//		Scheduler schedulerObj = new Scheduler();
-//		
-//		//File FloorInputFile.txt should be stored in directly in the project folder
-//		File ioFile = new File("src\\pack\\FloorInputFile.txt");
-//		FloorSubsystem floorSubsystem = new FloorSubsystem(schedulerObj, ioFile);
-//		schedulerObj.setup(floorSubsystem);
-//
-//		
-//		//Initialize threads
-//		scheduler = new Thread(schedulerObj, "scheduler");
-//		floor_subsystem = new Thread(floorSubsystem,"floor_subsystem");
-//
-//
-//		//Start threads
-//		floor_subsystem.start();
-//		scheduler.start();
-//
-//	}
-//	
+	/**
+	 * Method: Test Method
+	 */
 	public void testprint() {
 		System.out.println("CAN CALL THIS FUNCTION");
 	}
 
-
 	@Override
-	public void handleElevatorSystemUpdate(ElevatorSystemEvent e) throws InterruptedException {
-		//Handle event information
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
 		
-		
-		String executionTimeString = " ";
-		String eventCompletionCount = " ";
-		
-		eventCompletion.setText(eventCompletionCount);
-		executionTime.setText(executionTimeString);
 	}
+
 	
 }
