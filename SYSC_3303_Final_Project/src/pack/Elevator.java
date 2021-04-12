@@ -627,6 +627,14 @@ class Elevator implements Runnable{
 	public void setElevatorLamps(Boolean[] elevatorLamps) {
 		this.elevatorLamps = elevatorLamps;
 	}
+	
+	/**
+	 * Setter method to change Elevator Activation
+	 * @param b
+	 */
+	public void setActivation(boolean b) {
+		elevator_activated = b;
+	}
 	 
 	/**
 	*Code used to print the status of the Elevator.
