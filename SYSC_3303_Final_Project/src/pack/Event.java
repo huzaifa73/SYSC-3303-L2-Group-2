@@ -187,7 +187,6 @@ public class Event {
 		// fifth byte
 		boolean isFloor = (eventDataBytes[4] == 1) ? true : false;
 		e.setIsFloorRequest(isFloor);
-		System.out.println("rebuild event data ....  is floor: " + e.getIsFloorRequest() +" byte: " + isFloor);
 		
 		
 		// sixth byte
