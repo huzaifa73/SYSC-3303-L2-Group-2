@@ -1,4 +1,7 @@
 package pack;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 
 import java.net.DatagramPacket;
@@ -6,12 +9,15 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -46,6 +52,8 @@ class Scheduler implements Runnable{
     private volatile static LinkedList<Event> currentEventQueue = new LinkedList<>(); //From the elevator or the floor
     
     private schedulerState state;
+    private int totalEventsCount;
+    
     private int elevatorNumber = 4;
     private int portElevator = 69;
     //private boolean isfloorRequest;
@@ -79,7 +87,7 @@ class Scheduler implements Runnable{
     }
 	
     //Constructs the Scheduler with the GUI as an input
-    public Scheduler(ElevatorSystemGUI gui, double doorTime, double floorTime)
+    public Scheduler(ElevatorSystemGUI gui, double doorTime, double floorTime, File inputFile)
     {
        try {
     	sendSocket = new DatagramSocket();
@@ -89,6 +97,26 @@ class Scheduler implements Runnable{
     	   se.printStackTrace();
     	   System.exit(1);
        }
+       
+    // Get total number of events to be processed
+	try {		
+		BufferedReader bReader = new BufferedReader( //new buffered reader to read requests events
+				new FileReader(inputFile));
+		
+		int count = 0;
+		while((bReader.readLine()) != null) {
+			count++;
+		}
+		bReader.close();
+		totalEventsCount = count;
+		System.out.println("NUMBER OF LINES IN FILE: " + count);
+		
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		System.err.println("Error reading file in scheduler: " + e);
+		System.exit(1);
+	}
+       
        
         state = schedulerState.emptyState;
         elevatorQueues = new ArrayList<LinkedList<Event>>();
@@ -127,8 +155,8 @@ class Scheduler implements Runnable{
 
        //get data from packet
        data = recievePacket.getData();
-	Event currentEvent = Event.rebuildEvent(data);
-	    
+       
+       Event currentEvent = Event.rebuildEvent(data);
        if(currentEvent.getIsComplete()) {
     	   printWrapper("Got a completed event: " + currentEvent.getElevatorNumber());
     	   elevatorQueues.get(currentEvent.getElevatorNumber()).pop();
@@ -136,7 +164,6 @@ class Scheduler implements Runnable{
            currentEventQueue.add(currentEvent);
            printWrapper("Got data from something ... " + currentEvent);
        }
-
     }
     
 
@@ -485,7 +512,7 @@ class Scheduler implements Runnable{
 
     public void run()
     {
-        while(true) {
+        while(completedEventList.size() < totalEventsCount) {
         	recieve();
         	printList();
 
