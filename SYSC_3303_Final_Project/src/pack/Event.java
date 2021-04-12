@@ -299,7 +299,7 @@ public class Event {
 		this.isFloorRequest = isFloorRequest;
 	}
 	
-	private void setIsComplete(boolean isComplete) {
+	public void setIsComplete(boolean isComplete) {
 		this.isComplete = isComplete;
 		
 	}
