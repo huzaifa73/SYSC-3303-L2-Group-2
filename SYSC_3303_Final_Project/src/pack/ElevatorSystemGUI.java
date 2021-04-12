@@ -77,6 +77,23 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 		
 		//LEFT SECTION
 		
+				//Set timer for display
+				//TODO: stop the timer on complete event timer.stop()
+				executionTime = new JLabel(" ");
+				executionTime.setText("File Execution Time: 0:00");
+				ActionListener countDown=new ActionListener()
+				{
+					int count = 0;
+				    public void actionPerformed(ActionEvent e)
+				    {
+				        count += 100;
+				        SimpleDateFormat df=new SimpleDateFormat("mm:ss:S");
+				        executionTime.setText("File Execution Time: " + df.format(count));
+
+				    }
+				};
+				Timer timer=new Timer(100, countDown);
+		
 				startButton = new JButton("StartButton");
 				startButton.addActionListener((e -> { //NOTE: only defaults... have not connected to other buttons.
 
@@ -142,8 +159,6 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 				
 				//doorTimeInput.addActionListener();
 				
-				executionTime = new JLabel(" ");
-				executionTime.setText("File Execution Time: 0:00");
 				
 				eventCompletion = new JLabel("Completed Events: 0");
 				elevatorSystemTitle = new JLabel("Elevator System: Group 2 - 2021");
