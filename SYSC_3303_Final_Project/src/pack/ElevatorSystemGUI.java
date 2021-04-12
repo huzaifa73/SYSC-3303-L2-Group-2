@@ -27,6 +27,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	private TextField floorTimeInput; //Floor Time input field
 	private TextField doorTimeInput; //Door Time Input Field
 	private JLabel eventCompletion;  //Count of number of completed events
+	private int completeCount;
 	private JLabel executionTime; //Execution Time of system
 	private JLabel elevatorSystemTitle;  //Title of GUI Elevator System
 	private JButton fileInputButton; //Button used to upload the file
@@ -65,6 +66,9 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	
 	public ElevatorSystemGUI(){
 		super("Elevator System");
+		
+		completeCount = 0;
+		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		this.setLayout(new GridLayout(1,2));
@@ -112,9 +116,6 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 					//Create threads
 					Thread floor_subsystem, scheduler;
 				
-					//Create Objects
-					Scheduler schedulerObj = new Scheduler(this, doorTime, floorTime);
-					
 					//File FloorInputFile.txt should be stored in directly in the project folder
 					File defaultFile = new File("src\\pack\\FloorInputFile.txt");
 					
@@ -124,6 +125,11 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 					}
 					
 					System.out.println("THE FILENAME IS: " + IOFile.getName());
+					
+
+					//Create Objects
+					Scheduler schedulerObj = new Scheduler(this, doorTime, floorTime, IOFile);
+					
 					FloorSubsystem floorSubsystem = new FloorSubsystem(schedulerObj, IOFile); 
 					schedulerObj.setup(floorSubsystem);
 
@@ -164,16 +170,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 				
 				//doorTimeInput.addActionListener();
 				
-
-
-				
-
-				
-
-				
-				
-				
-				eventCompletion = new JLabel("Completed Events: 0");
+				eventCompletion = new JLabel("");
 				elevatorSystemTitle = new JLabel("Elevator System: Group 2 - 2021");
 		
 		//Add file input HERE *******
@@ -403,8 +400,21 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	public void stopTimer() {
 		if(timer != null) {
 			timer.stop();
+			System.out.println("Timer stopped!");
+			System.out.println("Final time: " + executionTime.getText());
 		}else {
 			System.out.println("ERROR: timer is null!");
+		}
+	}
+	
+	/**
+	 * Method: Test Method
+	 */
+	public void setCompleteCount(int count, int total) {
+		if(eventCompletion != null) {
+			eventCompletion.setText("Completed Events: " + count + "/" + total);
+		}else {
+			System.out.println("ERROR: completed events null");
 		}
 	}
 

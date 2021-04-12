@@ -25,7 +25,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * The Scheduler class implements a State Machine that provides
  * functionality for the Floor subsystem to send the events it processes 
  * from an input file, which can then be passed on to an Elevator requesting new events
- * @author Jerry, Desmond, Hovish
+ * @author Jerry, Desmond, Hovish, Cam
  * @version 3/27/2021
  */
 
@@ -34,6 +34,8 @@ class Scheduler implements Runnable{
     //Currently only handles one elevator
     private Elevator elevator;
     //elevator List
+    
+    private ElevatorSystemGUI gui;
     
     DatagramSocket sendSocket, receiveSocket;
     DatagramPacket sendPacket, sendPacketFloor, recievePacket;
@@ -89,6 +91,7 @@ class Scheduler implements Runnable{
     //Constructs the Scheduler with the GUI as an input
     public Scheduler(ElevatorSystemGUI gui, double doorTime, double floorTime, File inputFile)
     {
+    	this.gui = gui;
        try {
     	sendSocket = new DatagramSocket();
         	
@@ -117,6 +120,7 @@ class Scheduler implements Runnable{
 		System.exit(1);
 	}
        
+		gui.setCompleteCount(0, totalEventsCount);
        
         state = schedulerState.emptyState;
         elevatorQueues = new ArrayList<LinkedList<Event>>();
@@ -160,6 +164,10 @@ class Scheduler implements Runnable{
        if(currentEvent.getIsComplete()) {
     	   printWrapper("Got a completed event: " + currentEvent.getElevatorNumber());
     	   elevatorQueues.get(currentEvent.getElevatorNumber()).pop();
+    	   completedEventList.add(currentEvent);
+    	   gui.setCompleteCount(completedEventList.size(), totalEventsCount);
+       		System.out.println("CURRENT NUMBER OF COMPLETED EVENTS: " + completedEventList.size() + 
+       			"\nOUT OF: " + totalEventsCount);
        }else {
            currentEventQueue.add(currentEvent);
            printWrapper("Got data from something ... " + currentEvent);
@@ -232,9 +240,7 @@ class Scheduler implements Runnable{
     		//printWrapper("Setup Elevator Interface ID: " + eleInt);
     		eleInterface = new Thread(eleInt, "eleInterface");
     		eleInterface.start();
- 
     	}
-		
     }
     
     /**
@@ -494,6 +500,9 @@ class Scheduler implements Runnable{
      */
     public void receiveData(Event event) {
     	completedEventList.add(event);
+    	System.out.println("CURRENT NUMBER OF COMPLETED EVENTS: " + completedEventList.size() + 
+    			"\nOUT OF: " + totalEventsCount);
+    	
     	eventList.remove(event);
     	sendData(event);
     	setState();
@@ -523,6 +532,13 @@ class Scheduler implements Runnable{
                 Thread.sleep(1000);
             } catch (InterruptedException e) {}
         }
+        
+        printWrapper("All events completed!");
+        gui.stopTimer();
+        
+        
+        // End program and stop all threads
+        System.exit(0);
     }
     
     
