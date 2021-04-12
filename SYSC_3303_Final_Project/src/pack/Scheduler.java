@@ -127,7 +127,8 @@ class Scheduler implements Runnable{
 
        //get data from packet
        data = recievePacket.getData();
-
+	Event currentEvent = Event.rebuildEvent(data);
+	    
        if(currentEvent.getIsComplete()) {
     	   printWrapper("Got a completed event: " + currentEvent.getElevatorNumber());
     	   elevatorQueues.get(currentEvent.getElevatorNumber()).pop();
