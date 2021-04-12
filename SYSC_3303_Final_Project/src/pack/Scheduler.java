@@ -173,6 +173,16 @@ class Scheduler implements Runnable{
            printWrapper("Got data from something ... " + currentEvent);
        }
     }
+	
+	   /**
+     * Method: Stop the Elevator Threads
+     */
+    public void stopElevatorThreads() {
+    	
+    	for(int j = 0; j <elevatorInterfacesList.size(); j++ ) {
+				elevatorInterfacesList.get(j).getElevator().setActivation(false);		
+		}
+    }
     
 
     /**
