@@ -149,7 +149,7 @@ class Elevator implements Runnable{
 	
     
     /**
-     * Deals with the Case when there is a hard fault in the system when the Elevator is Stucked between 2 floors.
+     * Deals with the Case when there is a hard fault in the system when the Elevator is Stuck between 2 floors.
      * @return 
 	*/
 	public void elevator_hard_fault(){
@@ -159,8 +159,7 @@ class Elevator implements Runnable{
 			gui.setElevatorState(id, "OUT_OF_ORDER");
 			
 			elevator_activated =false; //turns of the elevator from the system
-			System.out.println("Elevator"+ id +"is Stuck between floors");
-			System.out.println("Elevator is Stucked between floor: "+ currentFloor +" and "+ floorstuck()); 
+			System.out.println("Elevator " + id + " is Stucked between floor: "+ currentFloor +" and "+ floorstuck()); 
 		}
 	}
 	
@@ -168,18 +167,21 @@ class Elevator implements Runnable{
 	*Soft Handler Deals with the DOOR_FAULT transient error, where the door is not close.
 	*/
 	public void elevator_soft_fault(){
+		System.out.println("The Door is Stuck on Elevator"+ id);
 
 		//Checking if its an error
 		if(systemError == SystemError.DOOR_FAULT){ 
 			softError = true;
 			gui.setElevatorState(id, "Door Stuck");
+			
+			int count = 0;
 
 			//tries to close the door 5 times
 			for(int i=0;i<5;i++){
 				long starttime = System.nanoTime(); //Gets the start time each time.
 
 				//Printing 
-				printWrapper("Door is closing...");
+				printWrapper("Attempting to close door...");
 				
 				try {
 					// Convert nano second unit to ms
@@ -194,15 +196,18 @@ class Elevator implements Runnable{
 					//if the elapsed time is more than twice the average for closing the door
 			        
 					if((elapsedtime > (10 * averageDoorClosing))||(systemError == SystemError.DOOR_FAULT)){
-						System.out.println("The door is still stuck."); //Prints
+						printWrapper("The door is still stuck after " + (i+1) + " attempts"); //Prints Door status update
+						count = 1+1;
 						continue; //Continue the for loop and tries to close again if condition is not met. 
 					}else{
 						doorOpen = false; //Succeeds in closing the door
-						System.out.println("The door closed after "+ (i+1)+ " trials."); 
 						return; //returns to the caller method.
 					}
 				
-			}
+			     }
+			systemError = SystemError.NO_ERROR;
+			printWrapper("The door closed after "+ count + " trials."); 
+		    gui.setElevatorState(id, "IDLE");
 		}
 	}
 	
@@ -212,14 +217,20 @@ class Elevator implements Runnable{
 		*/
 	private int floorstuck(){
 		
-			if(previousDirection == MotorState.UP){ //going up
+			if (currentFloor == 1) {
+				return 2;
+			}
+			else if (currentFloor == 22) {
+				return 21;
+			}
+			else if(previousDirection == MotorState.UP){ //going up
 				motorState = MotorState.STUCK; 
 				return (currentFloor+1); //returns the maximum floor that the elevator might be stuck on.			
 			}else if(previousDirection == MotorState.DOWN){ //going down
 				motorState = MotorState.STUCK;
 				return (currentFloor-1); //returns the maximum floor that the elevator might be stuck on.	
 			}
-			return -1;
+			return currentFloor+1;
 		}
 	
 	/**
@@ -332,7 +343,7 @@ class Elevator implements Runnable{
     public void run()
     {
     	
-        while(systemError != SystemError.TRAVEL_FAULT) {
+        while(elevator_activated && !(systemError == SystemError.TRAVEL_FAULT)) {
         	
         	if(newReceivedInfo != null) {
         		changeState(); //Change the state of the elevator System
@@ -343,6 +354,7 @@ class Elevator implements Runnable{
 	        } catch (InterruptedException e) {}
         	
         }
+        checkElevatorErrorState();
         printWrapper("HARD ERROR: Travel Fault from Elevator! Need Emergency Technician Right Away!");
     }
     
@@ -378,7 +390,7 @@ class Elevator implements Runnable{
 			break;
 			
 		case moveState:
-			gui.setElevatorState(id,"MOVING");
+			//gui.setElevatorState(id,"MOVING");
 			//Check if there is new Received info from the Scheduler
 			if (newReceivedInfo != null) {
 				//Check if targetFloot is greater than currentFloor
@@ -398,8 +410,6 @@ class Elevator implements Runnable{
 					
 					//if the elapsed time is more than twice the average for closing the door
 					if((elapsedtime > (10*averageDoorClosing))||(systemError == SystemError.DOOR_FAULT)){
-						System.out.println("The Door is Stuck on Elevator"+ id);
-						//Soft Error Handle.
 						elevator_soft_fault(); //Handles the Door not closing error.
 					}
 					
@@ -428,7 +438,6 @@ class Elevator implements Runnable{
 					
 					//if the elapsed time is more than twice the average for closing the door
 					if((elapsedtime > (10*averageDoorClosing))||(systemError == SystemError.DOOR_FAULT)){
-						System.out.println("The Door is Stuck on Elevator"+ id);
 						//Soft Error Handle.
 						elevator_soft_fault(); //Handles the Door not closing error.
 					}
@@ -448,7 +457,9 @@ class Elevator implements Runnable{
 			break;
 			
 		case destinationState:
+			checkElevatorErrorState();
 			gui.setElevatorState(id,"ARRIVED");
+			printWrapper("" + newReceivedInfo);
 			if (newReceivedInfo != null) {
 				if (targetFloor == currentFloor) {
 					printState();
@@ -461,7 +472,7 @@ class Elevator implements Runnable{
 					oldReceivedInfo = null;
 					printWrapper("Elevator " + id + " reached target and is stopped on floor: " + currentFloor + " event: " + sendingInfo);
 					try {
-						Thread.sleep(1000); 
+						Thread.sleep(3000); 
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -469,11 +480,30 @@ class Elevator implements Runnable{
 					sendingInfo = new Event(sendingInfo);
 					sendingInfo.setCurrentFloor(currentFloor);
 					eleInt.send(sendingInfo);
-					state = state.idleState;				
+					state = state.idleState;
+					gui.setElevatorState(id, "IDLE");
+					
 				}
 			}
+			checkElevatorErrorState();
+			
 			break;
 		}
+	}
+
+	/**
+	 * Method: Checks if the Elevator is in a System Error State
+	 */
+	private void checkElevatorErrorState() {
+		//Check for Door fault
+		if (systemError == SystemError.DOOR_FAULT) {
+			elevator_soft_fault();
+		}
+		//Else check for the TRAVEL_FAULT
+		else if (systemError == SystemError.TRAVEL_FAULT) {
+			elevator_hard_fault();
+		}
+		
 	}
 
 	/**
@@ -484,6 +514,8 @@ class Elevator implements Runnable{
 		long starttime;
 		long finaltime;
 		long elapsedtime;
+		
+		gui.setElevatorState(id, "MOVING");
 		
 		if((systemError == SystemError.TRAVEL_FAULT)){ //checks if upon calling move the door is still open or elevator is stuck
 			elevator_hard_fault(); //Handles the TRAVEL FAULT;
@@ -506,7 +538,7 @@ class Elevator implements Runnable{
 				elapsedtime = finaltime - starttime; //Computes the amount of time taken to move by 1 floor, repeats for every floor.
 
 				//Actual TRAVEL_Fault
-				if(elapsedtime>(10 * averageFloorMoving)){ //verifying if the floor is taking too long to move
+				if((elapsedtime>(10 * averageFloorMoving)) || (systemError == SystemError.TRAVEL_FAULT)){ //verifying if the floor is taking too long to move or TRAVEL_FAULT
 					systemError = SystemError.TRAVEL_FAULT;
 					elevator_hard_fault();  //handler to handle the Travel Fault.
 					return; //(Exit the while loop) 
@@ -531,7 +563,7 @@ class Elevator implements Runnable{
 				elapsedtime = finaltime - starttime; //Time taken to move down.
 
 				//Actual TRAVEL_Fault	
-				if(elapsedtime>(10 * averageFloorMoving)){
+				if((elapsedtime>(10 * averageFloorMoving)) || (systemError == SystemError.TRAVEL_FAULT)){ //verifying if the floor is taking too long to move or TRAVEL_FAULT
 					systemError = SystemError.TRAVEL_FAULT;
 					//call  hard error handling method
 					elevator_hard_fault(); //Causes a hard fault if time taken is too big.
