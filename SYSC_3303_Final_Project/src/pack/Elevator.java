@@ -476,11 +476,17 @@ class Elevator implements Runnable{
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					//sendEvent();
-					sendingInfo = new Event(sendingInfo);
-					sendingInfo.setCurrentFloor(currentFloor);
+					//Event Complete. Send to scheduler
+					printWrapper("EVENT COMPLETE: " + sendingInfo);
+					sendingInfo.setIsComplete(true);
 					eleInt.send(sendingInfo);
-					state = state.idleState;
+					//If it was a floor request complete, send back another event
+					if(sendingInfo.isFloorRequest) {
+						sendingInfo = new Event(sendingInfo);
+						sendingInfo.setCurrentFloor(currentFloor);
+						printWrapper("NEW CREATED EVENT: " + sendingInfo);
+						eleInt.send(sendingInfo);
+					}
 					gui.setElevatorState(id, "IDLE");
 					
 				}
