@@ -268,6 +268,10 @@ public class Event {
 	public SystemError getErrorType() {
 		return eventError;
 	}
+	
+	public boolean getIsComplete() {
+		return this.isComplete;
+	}
 
 	//Setters
 	public void setTimeString(String timeString){
