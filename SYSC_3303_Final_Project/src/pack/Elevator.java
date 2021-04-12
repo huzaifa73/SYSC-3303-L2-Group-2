@@ -157,9 +157,10 @@ class Elevator implements Runnable{
 		if(systemError == SystemError.TRAVEL_FAULT){ // Deactivates the Elevator	
 			//Prints where the Elevator is Stuck.
 			gui.setElevatorState(id, "OUT_OF_ORDER");
+			printWrapper("HARD ERROR: Travel Fault from Elevator! Need Emergency Technician Right Away! Stuck between " + currentFloor + " and " + floorstuck());
 			
 			elevator_activated =false; //turns of the elevator from the system
-			System.out.println("Elevator " + id + " is Stucked between floor: "+ currentFloor +" and "+ floorstuck()); 
+			//System.out.println("Elevator " + id + " is Stucked between floor: "+ currentFloor +" and "+ floorstuck()); 
 		}
 	}
 	
@@ -336,6 +337,10 @@ class Elevator implements Runnable{
 	public boolean getSoftError() { 
     	  return softError;
       }
+	
+	public void setSystemError(SystemError error) {
+		systemError = error;
+	}
     
     /**
      * Continually request the Scheduler for a new Event and process it using the state machine
@@ -354,8 +359,11 @@ class Elevator implements Runnable{
 	        } catch (InterruptedException e) {}
         	
         }
+        if(!elevator_activated) {
+        	printWrapper("Elevator is deactivated");
+        }
         checkElevatorErrorState();
-        printWrapper("HARD ERROR: Travel Fault from Elevator! Need Emergency Technician Right Away!");
+        //printWrapper("HARD ERROR: Travel Fault from Elevator! Need Emergency Technician Right Away!");
     }
     
 
@@ -491,6 +499,7 @@ class Elevator implements Runnable{
 					
 				}
 			}
+			state = state.idleState;
 			checkElevatorErrorState();
 			
 			break;
@@ -528,7 +537,7 @@ class Elevator implements Runnable{
 			return;//exits the method.
 		}
 		
-		while(currentFloor != targetFloor) {
+		while((currentFloor != targetFloor) && elevator_activated) {
 			//Set oldReceivedInfo equal to newReceivedInfo
 			oldReceivedInfo = newReceivedInfo;
 			
@@ -655,6 +664,8 @@ class Elevator implements Runnable{
 	 private void printState() {
 		 printWrapper("State: " + state + " \ncurrentFloor: " + currentFloor + " \ntargetFloor: " + targetFloor + "\nnewReceivedInfo: " + newReceivedInfo);
 	 }
+
+
 
 	 
 }
