@@ -23,7 +23,7 @@ class Elevator implements Runnable{
     private Event oldReceivedInfo;
     private Event sendingInfo;
     
-    private final int NANO_SECOND_CONVERSION = 100000000;
+    private final int NANO_SECOND_CONVERSION = 1000000000;
     private long averageDoorClosing = 939000000; //average time taken to close a door. (in ns)
     private long averageFloorMoving = 950000000; //average time taken to move between two floors. (in ns)
 
@@ -192,6 +192,7 @@ class Elevator implements Runnable{
 			        long elapsedtime = endtime - starttime; // Calculates the time elapsed. 
 					
 					//if the elapsed time is more than twice the average for closing the door
+			        
 					if((elapsedtime > (10 * averageDoorClosing))||(systemError == SystemError.DOOR_FAULT)){
 						System.out.println("The door is still stuck."); //Prints
 						continue; //Continue the for loop and tries to close again if condition is not met. 
@@ -230,30 +231,7 @@ class Elevator implements Runnable{
 	}
 	
 
-    
-    /**
-     * Requests a new Event from the Scheduler, will block until one is received
-     
-    public void readEvent() {
-    	//request recievedInfo from Scheduler
-    	scheduler.requestEvent(); 
-    }
-    */
-    
-    /**
-     * Called from the Scheduler class, used to send the previously requested event to the Elevator
-     * 
-     * @param event The Event object to be sent to the Elevator
-     
-    public void receiveRequest(Event event) {
-    	newReceivedInfo = event;
-    	printWrapper("RECEIVE REQUEST: " + newReceivedInfo.toString() + "\nCurrent Elevator Floor " + currentFloor);
-    	readInfo(newReceivedInfo);
-    	
-    	printState();
-	}
-	*/
-	
+
     
     /**
      * Called when an Event is completed to notify the Scheduler
@@ -527,8 +505,8 @@ class Elevator implements Runnable{
 				finaltime = System.nanoTime();//Gets end time After moving up by 1 floor.
 				elapsedtime = finaltime - starttime; //Computes the amount of time taken to move by 1 floor, repeats for every floor.
 
-				//Actual TRAVEL_Fault	
-				if(elapsedtime>(2 * averageFloorMoving)){ //verifying if the floor is taking too long to move
+				//Actual TRAVEL_Fault
+				if(elapsedtime>(10 * averageFloorMoving)){ //verifying if the floor is taking too long to move
 					systemError = SystemError.TRAVEL_FAULT;
 					elevator_hard_fault();  //handler to handle the Travel Fault.
 					return; //(Exit the while loop) 
@@ -544,7 +522,7 @@ class Elevator implements Runnable{
 			else if (motorState.equals(MotorState.DOWN)) {
 				starttime = System.nanoTime(); //gets the StartTime for moving down by 1 floor.
 				try {
-					Thread.sleep(averageDoorClosing/NANO_SECOND_CONVERSION*1000);  //The time it takes the elevator to move one floor
+					Thread.sleep(averageFloorMoving/NANO_SECOND_CONVERSION*1000);  //The time it takes the elevator to move one floor
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -553,7 +531,7 @@ class Elevator implements Runnable{
 				elapsedtime = finaltime - starttime; //Time taken to move down.
 
 				//Actual TRAVEL_Fault	
-				if(elapsedtime>(2 * averageFloorMoving)){
+				if(elapsedtime>(10 * averageFloorMoving)){
 					systemError = SystemError.TRAVEL_FAULT;
 					//call  hard error handling method
 					elevator_hard_fault(); //Causes a hard fault if time taken is too big.
