@@ -138,13 +138,14 @@ public class Event {
 		// third byte corresponds to current floor
 		eventDataBaos.write(e.getCurrentFloor());
 		
-		
+		//fourth byte
 		eventDataBaos.write(e.getFinalDestination());
 		
-		// the actual last byte corresponds to whether it came from a floor or elevator
+		// fifth byte
 		byte isFloor = (byte)((e.getIsFloorRequest()) ? 1 : 0);
 		eventDataBaos.write(isFloor);
 		
+		// sixth byte
 		eventDataBaos.write(e.getErrorType().errorCode);
 		
 		byte isComplete = (byte)((e.isComplete) ? 1 : 0);
@@ -180,21 +181,22 @@ public class Event {
 		// third byte corresponds to current floor
 		e.setCurrentFloor((int) eventDataBytes[2]);
 		
-		// third byte corresponds to current floor
+		// fourth byte corresponds to current floor
 		e.setFinalDestination((int) eventDataBytes[3]);
 		
-		// the actual last byte corresponds to whether it came from a floor or elevator
+		// fifth byte
 		boolean isFloor = (eventDataBytes[4] == 1) ? true : false;
 		e.setIsFloorRequest(isFloor);
-		//System.out.println("rebuild event data ....  is floor: " + e.getIsFloorRequest() +" byte: " + isFloor);
+		System.out.println("rebuild event data ....  is floor: " + e.getIsFloorRequest() +" byte: " + isFloor);
 		
 		
-		// fourth byte corresponds to error type
+		// sixth byte
         SystemError temp = null;
         int errorCode = (int) eventDataBytes[5];
         
+        //seventh byte
         boolean isComplete = (eventDataBytes[6] == 1) ? true : false;
-		e.setIsFloorRequest(isComplete);
+		e.setIsComplete(isComplete);
         
         // Assign error type
         for (SystemError currError : SystemError.values()) {
@@ -223,6 +225,8 @@ public class Event {
 		return e;
 	}
 	
+
+
 
 	private void setErrorType(SystemError systemError) {
 		this.eventError = systemError;
@@ -296,7 +300,10 @@ public class Event {
 		this.isFloorRequest = isFloorRequest;
 	}
 	
-
+	private void setIsComplete(boolean isComplete) {
+		this.isComplete = isComplete;
+		
+	}
 
 	
 	
