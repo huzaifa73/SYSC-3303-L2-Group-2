@@ -14,7 +14,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import javax.swing.*;
 
 /**
- * @author Blake, Hovish, Jerry
+ * @author Blake, Hovish, Jerry, Cam
  *
  */
 public class ElevatorSystemGUI extends JFrame implements ActionListener {
@@ -56,6 +56,9 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 		private int e4TargetFloor = 1;
 		private String e4State = "";
 		private Timer timer;
+		
+		private JButton[] passengerCounters = new JButton[4];
+		private int[] passengerCounts = new int[4];
 		
 		final String TARGET = "TARGET";
 		
@@ -213,7 +216,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 				
 		//Right Section
 
-		JPanel buttonPanel = new JPanel(new GridLayout(27, 4));
+		JPanel buttonPanel = new JPanel(new GridLayout(28, 4)); // change back to 27, 4
 
 		buttonPanel.setPreferredSize(new Dimension(600,1000));
 		buttonPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -245,11 +248,9 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 			switch(r) {
 				case 0:
 					elevator4[f] = temp;
-					
 					break;
 				case 1:
 					elevator3[f] = temp;
-	
 					break;
 				case 2:
 					elevator2[f] = temp;
@@ -265,13 +266,35 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 			
 		}
 		
+		for(int i = 0; i < passengerCounts.length; i++){
+			passengerCounts[i] = 0;
+		}
+		
+		JButton counterLead = new JButton("# People");
+		JButton counter1 = new JButton("" + passengerCounts[0]);
+		JButton counter2 = new JButton("" + passengerCounts[1]);
+		JButton counter3 = new JButton("" + passengerCounts[2]);
+		JButton counter4 = new JButton("" + passengerCounts[3]);
+		
+		passengerCounters[0] = counter1;
+		passengerCounters[1] = counter2;
+		passengerCounters[2] = counter3;
+		passengerCounters[3] = counter4;
+		
+		counterLead.setEnabled(false);
+		buttonPanel.add(counterLead);
+		
+		for(int i = 0; i < passengerCounts.length; i++){
+			passengerCounters[i].setEnabled(false);
+			buttonPanel.add(passengerCounters[i]);
+		}
+		
+		
 		setElevatorFloor(0, 1);
 		setElevatorFloor(1, 1);
 		setElevatorFloor(2, 1);
 		setElevatorFloor(3, 1);
 		
-		
-
 		this.add(fieldPanel);
 		this.add(buttonPanel);
 		
@@ -290,6 +313,19 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	 */
 	public void setCompletedEvents(int numberEvents) {
 		eventCompletion.setText("Completed Events: " + String.valueOf(numberEvents));
+	}
+	
+	/**
+	 * Method: Updates the number of passengers in elevator n
+	 * @param n The elevator to change
+	 * @param passCount The number of passengers in the elevator
+	 */
+	public void setPassengerCount(int n, int passCount) {
+		if(passengerCounters != null) {
+			if(passengerCounters[n-1] != null) {
+				passengerCounters[n-1].setText("" + passCount);
+			}
+		}
 	}
 	
 	/**
