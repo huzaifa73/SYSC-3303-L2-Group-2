@@ -42,6 +42,8 @@ public class Event {
 		this.timeString = e.timeString;
 		this.eventError = e.eventError;
 		this.isComplete = false;
+		
+		this.elevatorNumber = e.elevatorNumber;
 	}
 	
 	/**
