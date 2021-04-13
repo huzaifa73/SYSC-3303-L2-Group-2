@@ -120,7 +120,7 @@ class Scheduler implements Runnable{
 		System.exit(1);
 	}
        
-		gui.setCompleteCount(0, totalEventsCount);
+		gui.setCompleteCount(0, 2*totalEventsCount);
        
         state = schedulerState.emptyState;
         elevatorQueues = new ArrayList<LinkedList<Event>>();
@@ -165,7 +165,7 @@ class Scheduler implements Runnable{
     	   printWrapper("Got a completed event: " + currentEvent.getElevatorNumber());
     	   elevatorQueues.get(currentEvent.getElevatorNumber()).pop();
     	   completedEventList.add(currentEvent);
-    	   gui.setCompleteCount(completedEventList.size(), totalEventsCount);
+    	   gui.setCompleteCount(completedEventList.size(), 2*totalEventsCount);
        		System.out.println("CURRENT NUMBER OF COMPLETED EVENTS: " + completedEventList.size() + 
        			"\nOUT OF: " + totalEventsCount);
        }else {
@@ -178,7 +178,6 @@ class Scheduler implements Runnable{
      * Method: Stop the Elevator Threads
      */
     public void stopElevatorThreads() {
-    	
     	for(int j = 0; j <elevatorInterfacesList.size(); j++ ) {
 				elevatorInterfacesList.get(j).getElevator().setActivation(false);		
 		}
@@ -354,6 +353,9 @@ class Scheduler implements Runnable{
 			printWrapper("Only Task: No need to sort");
 		}
 		
+		/**
+		 * ?: Null check should be at the start not here
+		 */
 		//if the elevator is going down then sort the list in ascending order
 		else if(currentEvent.getUpDown()){
 			if(tempEle == null) {
@@ -531,7 +533,7 @@ class Scheduler implements Runnable{
 
     public void run()
     {
-        while(completedEventList.size() < totalEventsCount) {
+        while(completedEventList.size() < 2 * totalEventsCount) {
         	recieve();
         	printList();
 
@@ -546,9 +548,12 @@ class Scheduler implements Runnable{
         printWrapper("All events completed!");
         gui.stopTimer();
         
+        for(int i = 0; i < elevatorInterfacesList.size(); i++) {
+        	stopElevatorThreads();
+        }
         
         // End program and stop all threads
-        System.exit(0);
+        
     }
     
     
