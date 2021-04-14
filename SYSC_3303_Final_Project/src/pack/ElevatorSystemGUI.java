@@ -29,6 +29,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	private TextField doorTimeInput; //Door Time Input Field
 	private JLabel eventCompletion;  //Count of number of completed events
 	private int completeCount;
+	private int passengerCount = 0;
 	private JLabel executionTime; //Execution Time of system
 	private JLabel elevatorSystemTitle;  //Title of GUI Elevator System
 	private JButton fileInputButton; //Button used to upload the file
@@ -325,6 +326,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	 * @param passCount The number of passengers in the elevator
 	 */
 	public void setPassengerCount(int n, int passCount) {
+		passengerCount = passCount;
 		if(passengerCounters != null) {
 			if(passengerCounters[n-1] != null) {
 				passengerCounters[n-1].setText("" + passCount);
@@ -499,7 +501,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	}
 	
 	/**
-	 * Method: Test Method
+	 * Method: set completed event count
 	 */
 	public void setCompleteCount(int count, int total) {
 		if(eventCompletion != null) {
@@ -507,6 +509,14 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 		}else {
 			System.out.println("ERROR: completed events null");
 		}
+	}
+	/**
+	 * Method: add the passenger to the hard fault
+	 */
+	public void incrementPeople(int eleNum) {
+
+		setPassengerCount(eleNum+1, passengerCount+1);
+
 	}
 
 	@Override
