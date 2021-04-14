@@ -58,6 +58,7 @@ class Elevator implements Runnable{
     
     //*****Iteration 5
     private Boolean elevatorLamps[]; //Array of Elevator lamps 
+    private int count = 0;
     
     /**
      * Create a new Elevator with the assigned Scheduler, Constructor.
@@ -117,6 +118,7 @@ class Elevator implements Runnable{
         sendingInfo = new Event();
         //newReceivedInfo = new Event();
         oldReceivedInfo = new Event();
+        previousDirection = MotorState.UP; //TODO Added 
 
     }
 	
@@ -189,7 +191,6 @@ class Elevator implements Runnable{
 					// Convert nano second unit to ms
 					Thread.sleep(averageDoorClosing/NANO_SECOND_CONVERSION*1000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} //Waiting for 9.39 seconds 
 				long endtime = System.nanoTime();//gets the endTime for closing the door
@@ -296,6 +297,14 @@ class Elevator implements Runnable{
     	return this.motorState;
     }
     
+    /**
+     *@return the motorstate.
+     *
+     */
+     public MotorState getPreviousDirection(){
+     	return this.previousDirection;
+     }
+    
      
     /**
     *@return the time.
@@ -379,7 +388,7 @@ class Elevator implements Runnable{
 		case idleState :
 			gui.setElevatorState(id,"IDLE");
 			//Set the motorState to STOPPED  and open the door
-			previousDirection= motorState;
+			//previousDirection= motorState;
 			motorState = motorState.STOPPED;
 			doorOpen = true;
 			
@@ -409,7 +418,6 @@ class Elevator implements Runnable{
 					try {
 						Thread.sleep(averageDoorClosing/NANO_SECOND_CONVERSION*1000);  //initial value: 9390
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} //Waiting for 9.39 seconds 
 					
@@ -437,7 +445,6 @@ class Elevator implements Runnable{
 					try {
 						Thread.sleep(averageDoorClosing/NANO_SECOND_CONVERSION*1000); //initial value: 9390
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} //Waiting for 9.39 seconds 
 					
@@ -467,10 +474,10 @@ class Elevator implements Runnable{
 			
 		case destinationState:
 			checkElevatorErrorState();
-			gui.setElevatorState(id,"ARRIVED");
 			printWrapper("" + newReceivedInfo);
 			if (newReceivedInfo != null) {
 				if (targetFloor == currentFloor) {
+					gui.setElevatorState(id,"ARRIVED"); //TODO
 					printState();
 					//Change state of motor to stopped and open door
 					motorState = motorState.STOPPED;
@@ -481,7 +488,7 @@ class Elevator implements Runnable{
 					oldReceivedInfo = null;
 					printWrapper("Elevator " + id + " reached target and is stopped on floor: " + currentFloor + " event: " + sendingInfo);
 					try {
-						Thread.sleep(3000); 
+						Thread.sleep(1000); 
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -495,16 +502,25 @@ class Elevator implements Runnable{
 					sendingInfo.setIsComplete(true);
 					eleInt.send(sendingInfo);
 					
+					count++;
+					
 					//If it was a floor request complete, send back another event
 					if(sendingInfo.isFloorRequest) {
 						sendingInfo = new Event(sendingInfo);
 						sendingInfo.setCurrentFloor(currentFloor);
-						printWrapper("NEW CREATED EVENT: " + sendingInfo);
+						sendingInfo.setElevatorNumber(id);  //TODO
+						printWrapper("NEW CREATED EVENT: (" + count + ")"  + sendingInfo);
 						eleInt.send(sendingInfo);
 						gui.setPassengerCount(id+1, ++passengerCount);
 					}
 					else {
 						gui.setPassengerCount(id+1, --passengerCount);
+					}
+					
+					try { //TODO TESTING
+						Thread.sleep(1000); 
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
 					gui.setElevatorState(id, "IDLE");
 					
@@ -553,7 +569,7 @@ class Elevator implements Runnable{
 			oldReceivedInfo = newReceivedInfo;
 			
 			//Check if motorState equals UP. If true, then move elevator UP
-			if (motorState.equals(MotorState.UP)) {
+			if (motorState.equals(MotorState.UP) && currentFloor < targetFloor) { //TODO
 				starttime = System.nanoTime(); //gets the StartTime for moving up by 1 floor.
 				try {
 					Thread.sleep(averageFloorMoving/NANO_SECOND_CONVERSION*1000);  //The time it takes the elevator to move one floor
@@ -572,12 +588,12 @@ class Elevator implements Runnable{
 				
 				
 				currentFloor++;
-				printWrapper("Elevator " + id + " moved to: " + currentFloor);
+				printWrapper("Elevator " + id + " moved to: " + currentFloor + " . Target Floor: " + targetFloor); //TODO
 				gui.setElevatorFloor(id, currentFloor);
 				
 			}
 			//Check if motorState equals UP. If true, then move elevator DOWN
-			else if (motorState.equals(MotorState.DOWN)) {
+			else if (motorState.equals(MotorState.DOWN) && currentFloor > targetFloor) { //TODO
 				starttime = System.nanoTime(); //gets the StartTime for moving down by 1 floor.
 				try {
 					Thread.sleep(averageFloorMoving/NANO_SECOND_CONVERSION*1000);  //The time it takes the elevator to move one floor
@@ -598,7 +614,7 @@ class Elevator implements Runnable{
 				}
 
 				currentFloor--; //decrements floor since going down.
-				printWrapper("Elevator " + id + " moved to: " + currentFloor); //Prints formatted information.
+				printWrapper("Elevator " + id + " moved to: " + currentFloor + " . Target Floor: " + targetFloor); //TODO //Prints formatted information.
 				gui.setElevatorFloor(id, currentFloor);
 			}
 			
