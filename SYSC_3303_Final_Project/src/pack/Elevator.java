@@ -54,6 +54,7 @@ class Elevator implements Runnable{
 
     private ElevatorInterface eleInt;
     private boolean softError;
+    private int passengerCount;
     
     //*****Iteration 5
     private Boolean elevatorLamps[]; //Array of Elevator lamps 
@@ -96,7 +97,7 @@ class Elevator implements Runnable{
     	averageDoorClosing = (long)(doorTime * NANO_SECOND_CONVERSION);
     	averageFloorMoving = (long)(floorTime * NANO_SECOND_CONVERSION);
     	
-    	
+    	passengerCount = 0;
         this.scheduler = scheduler;
         this.gui = gui;
         doorOpen = false;
@@ -205,7 +206,7 @@ class Elevator implements Runnable{
 						return; //returns to the caller method.
 					}
 				
-			     }
+			}
 			systemError = SystemError.NO_ERROR;
 			printWrapper("The door closed after "+ count + " trials."); 
 		    gui.setElevatorState(id, "IDLE");
@@ -484,16 +485,26 @@ class Elevator implements Runnable{
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
+					
+					/**
+					 * ?: Event should only be marked complete if it is an elevator event?
+					 * Put first block in else?
+					 */
 					//Event Complete. Send to scheduler
 					printWrapper("EVENT COMPLETE: " + sendingInfo);
 					sendingInfo.setIsComplete(true);
 					eleInt.send(sendingInfo);
+					
 					//If it was a floor request complete, send back another event
 					if(sendingInfo.isFloorRequest) {
 						sendingInfo = new Event(sendingInfo);
 						sendingInfo.setCurrentFloor(currentFloor);
 						printWrapper("NEW CREATED EVENT: " + sendingInfo);
 						eleInt.send(sendingInfo);
+						gui.setPassengerCount(id+1, ++passengerCount);
+					}
+					else {
+						gui.setPassengerCount(id+1, --passengerCount);
 					}
 					gui.setElevatorState(id, "IDLE");
 					
@@ -594,6 +605,9 @@ class Elevator implements Runnable{
 			//Request an event from the scheduler to see if there's an updated one
 			//readEvent();
 			
+			/**
+			 * ?: Doesn't this overwrite the event, losing the current one?
+			 */
 			//Check if there is a new request
 			if (oldReceivedInfo != newReceivedInfo) {
 				state = state.moveState;
