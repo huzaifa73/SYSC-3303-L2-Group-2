@@ -42,7 +42,6 @@ public class Event {
 		this.timeString = e.timeString;
 		this.eventError = e.eventError;
 		this.isComplete = false;
-		
 		this.elevatorNumber = e.elevatorNumber;
 	}
 	
@@ -69,16 +68,7 @@ public class Event {
 		this.isComplete = false;
 	}
 	
-	/**
-	 * Create a new Event with the specified params using delay
-	 * @param isFloorRequest
-	 * @param delay
-	 * @param upDownS "UP" or "DOWN" case irrelevant
-	 * @param finalDestination
-	 * @param targetFloor
-	 * @param eventError
-	 * @throws InvalidAttributesException
-	 */
+	
 	public Event(boolean isFloorRequest, long delay, String upDownS, int finalDestination, int targetFloor, int eventErrorCode) throws InvalidAttributesException {
 		this.isFloorRequest = isFloorRequest;
 		this.delay = delay;
@@ -108,11 +98,52 @@ public class Event {
 		
 	}
 	
+	/**
+	 * Create a new Event with the specified params using delay
+	 * @param isFloorRequest
+	 * @param delay
+	 * @param upDownS "UP" or "DOWN" case irrelevant
+	 * @param finalDestination
+	 * @param targetFloor
+	 * @param eventError
+	 * @throws InvalidAttributesException
+	 */
+	public Event(boolean isFloorRequest, long delay, String upDownS, int finalDestination, int targetFloor, int eventErrorCode, int elevatorNum) throws InvalidAttributesException {
+		this.isFloorRequest = isFloorRequest;
+		this.delay = delay;
+		this.finalDestination = finalDestination;
+		this.targetFloor = targetFloor;
+		this.currentFloor = targetFloor;
+		this.elevatorNumber = elevatorNum;
+		
+		// Assign error type
+		for (SystemError e : SystemError.values()) {
+			 if (e.errorCode == eventErrorCode) {
+			      this.eventError = e;
+			    }
+		}
+		
+		if(eventError == null)
+			throw new IllegalArgumentException("Unexpected value for error code: " + eventErrorCode);
+		
+		
+		if(upDownS.toUpperCase().equals("UP"))
+			upDown = true;
+		else if(upDownS.toUpperCase().equals("DOWN"))
+			upDown = false;
+		else {
+			throw new InvalidAttributesException("Direction string not matching UP or DOWN");
+		}
+		this.isComplete = false;
+		
+	}
+	
 	@Override
 	public String toString() {
 		String direction = upDown==true ? "UP" : "DOWN";
 		return new String(
 				"isFloorRequest: " + isFloorRequest +
+				"isComplete: " + isComplete +
 				"\nEVENTERROR: " + eventError.name() +
 				"\nDELAY: " + delay + 
 				"\nTIME: " + timeString + 
@@ -150,8 +181,15 @@ public class Event {
 		// sixth byte
 		eventDataBaos.write(e.getErrorType().errorCode);
 		
+		//seventh
 		byte isComplete = (byte)((e.isComplete) ? 1 : 0);
 		eventDataBaos.write(isComplete);
+		
+		//8th
+		eventDataBaos.write(e.getElevatorNumber());
+		
+		
+		//eventDataBaos.write(77);
 		
 		// last bytes correspond to time
 		// convert timestring (in the form "yyyy/MM/dd HH:mm:ss") to bytes
@@ -161,7 +199,7 @@ public class Event {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-
+		byte[] eventDataBytes = eventDataBaos.toByteArray();
 		
 		return eventDataBaos.toByteArray();
 	}
@@ -195,21 +233,28 @@ public class Event {
         SystemError temp = null;
         int errorCode = (int) eventDataBytes[5];
         
-        //seventh byte
-        boolean isComplete = (eventDataBytes[6] == 1) ? true : false;
-		e.setIsComplete(isComplete);
-        
         // Assign error type
         for (SystemError currError : SystemError.values()) {
             if (currError.errorCode == errorCode) {
                 temp = currError;
             }
         }
-        
         if(temp == null)
             throw new IllegalArgumentException("Unexpected value for error code when rebuilding byte package: " + errorCode);
         
         e.setErrorType(temp);
+        
+        //seventh byte
+        boolean isComplete = (eventDataBytes[6] == 1) ? true : false;
+		e.setIsComplete(isComplete);
+        
+
+        
+		//8th
+		int elevatorNum = (int) eventDataBytes[7];
+		e.setElevatorNumber(elevatorNum);
+		
+
 		
 		
 		// last bytes correspond to time
