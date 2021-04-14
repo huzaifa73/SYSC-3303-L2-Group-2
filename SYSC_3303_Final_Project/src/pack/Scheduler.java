@@ -40,7 +40,7 @@ class Scheduler implements Runnable{
     DatagramSocket sendSocket, receiveSocket;
     DatagramPacket sendPacket, sendPacketFloor, recievePacket;
     
-    private ArrayList<ElevatorInterface> elevatorInterfacesList = new ArrayList<ElevatorInterface>(); //TODO
+    private ArrayList<ElevatorInterface> elevatorInterfacesList = new ArrayList<ElevatorInterface>(); //List of the elevator interfaces
     
     private ArrayList<LinkedList<Event>> elevatorQueues = new ArrayList<LinkedList<Event>>();
     
@@ -59,6 +59,8 @@ class Scheduler implements Runnable{
     private int elevatorNumber = 4;
     private int portElevator = 69;
     //private boolean isfloorRequest;
+    private int recieveCount;
+    private int sentCount;
 	
     //State Machine for scheduler
     //State 0: event list is empty
@@ -115,7 +117,6 @@ class Scheduler implements Runnable{
 		System.out.println("NUMBER OF LINES IN FILE: " + count);
 		
 	} catch (IOException e) {
-		// TODO Auto-generated catch block
 		System.err.println("Error reading file in scheduler: " + e);
 		System.exit(1);
 	}
@@ -159,22 +160,74 @@ class Scheduler implements Runnable{
 
        //get data from packet
        data = recievePacket.getData();
-       
        Event currentEvent = Event.rebuildEvent(data);
+       
+       recieveCount++;
+       printWrapper("Recieved Event " + recieveCount + " from Floor Request: " + currentEvent.getIsFloorRequest());
+       //private int sentCount;
+       
+       
+       //printWrapper("Completed Event: " + currentEvent); 
        if(currentEvent.getIsComplete()) {
     	   printWrapper("Got a completed event: " + currentEvent.getElevatorNumber());
 
-    	   printWrapper("Current Queue: " + elevatorQueues.get(currentEvent.getElevatorNumber()));
-    	   elevatorQueues.get(currentEvent.getElevatorNumber()).pop();
+    	   printWrapper("Elevator + " + currentEvent.getElevatorNumber() + " Current Queue: " + elevatorQueues.get(currentEvent.getElevatorNumber()));
+    	   printWrapper("Completed Event: " + elevatorQueues.get(currentEvent.getElevatorNumber()).peek()); 
     	   
-    	   printWrapper("Remaining Queue: " + elevatorQueues.get(currentEvent.getElevatorNumber()));
+    	   LinkedList<Event> currentQueue = elevatorQueues.get(currentEvent.getElevatorNumber());
+    	   
+    	   boolean eventRemoved = false;
+    	   
+    	   //Need to know the Elevator Queue is popping the right Event ---Pop if target and destination are the same TODO
+    	   for (int j = 0; j < currentQueue.size(); j++) {
+    		   if ((currentQueue.get(j).getTargetFloor() == currentEvent.getTargetFloor()) && (currentQueue.get(j).getFinalDestination() == currentEvent.getFinalDestination())) {
+    			   elevatorQueues.get(currentEvent.getElevatorNumber()).remove(j);
+    			   eventRemoved = true;
+    		   }
+    	   }
+    	   
+    	   if (!eventRemoved) {
+    		   printWrapper("ERROR! Event not POPPED From Elevator " + currentEvent.getElevatorNumber()+ " Queue. NOTE: Event Target: " + currentEvent.getTargetFloor() + ". Event Destination: " + currentEvent.getFinalDestination() + ". FROM: " + currentQueue );
+    	   }
+    	   
+    	   printWrapper("Remaining Elevator " + currentEvent.getElevatorNumber() + " Queue: " + elevatorQueues.get(currentEvent.getElevatorNumber()));
+    	   
+    	   //Remove Event from currentEventQueue TODO
+    	   boolean mainListRemoved = false;
+    	   for (int j = 0; j < currentEventQueue.size(); j++) {
+    		   if ((currentEventQueue.get(j).getCurrentFloor() == currentEvent.getCurrentFloor()) && (currentEventQueue.get(j).getFinalDestination() == currentEvent.getFinalDestination())) { //TODO Changed from Target to Current Floor
+    			   currentEventQueue.remove(j);
+    			   mainListRemoved = true;
+    		   }
+    	   }
+    	   if (!mainListRemoved) {
+    		   printWrapper("ERROR! Event not POPPED From Scheduler Queue");
+    	   }
+    	   printWrapper("Remaining Scheduler Queue: " + currentEventQueue);
+    	   
+    	   
     	   
     	   completedEventList.add(currentEvent);
     	   gui.setCompleteCount(completedEventList.size(), 2*totalEventsCount);
        		System.out.println("CURRENT NUMBER OF COMPLETED EVENTS: " + completedEventList.size() + 
        			"\nOUT OF: " + totalEventsCount);
-       }else {
+       		
+       		
+       		//Send Another Event to Elevator if Scheduler's currentEventQueue is EMPTY and Elevator's QUEUE is NOT EMPTY//TODO
+       		if ((currentEventQueue.isEmpty()) && !(elevatorQueues.get(currentEvent.getElevatorNumber()).isEmpty())){
+       			sendPacket(currentEvent.getElevatorNumber());
+       		}
+       }
+       else if (!currentEvent.isFloorRequest) { //TODO
+    	   //New Event Create by Elevator -> This needs to go to the same elevator 
+    	   elevatorScheduler(currentEvent.getElevatorNumber(), currentEvent);
+    	   printWrapper("Received Button Event from Elevator: " + currentEvent.getElevatorNumber());
+       }
+       
+       else {
+    	   //
            currentEventQueue.add(currentEvent);
+           printWrapper("Recently Added Scheduler Queue: " + currentEventQueue);
            printWrapper("Got data from something ... " + currentEvent);
        }
     }
@@ -193,13 +246,12 @@ class Scheduler implements Runnable{
      * Method: Send Packet to Elevators
      */
     private void sendPacket(int elevatorIndex) {
-    	Event eventPeeked = (elevatorQueues.get(elevatorIndex)).peek();
+    	Event eventPeeked = (elevatorQueues.get(elevatorIndex)).peek(); //TODO BEfore: peeked()
     	printWrapper("EVENT PEEKED " + eventPeeked);
         byte msg[] = Event.buildByteArray(eventPeeked);
         try {
 			sendPacket =  new DatagramPacket(msg, msg.length,InetAddress.getLocalHost(),elevatorIndex+portElevator);
 		} catch (UnknownHostException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 
@@ -210,6 +262,9 @@ class Scheduler implements Runnable{
             e.printStackTrace();
             System.exit(1);
         }	
+        
+        sentCount++;
+        printWrapper("Sent Event " + sentCount + " from Floor Request: " + eventPeeked.getIsFloorRequest()); //TODO
     	
     }
     
@@ -262,6 +317,7 @@ class Scheduler implements Runnable{
      * Method: Sorts the CurrentEvent towards the correct Elevator event list
      */
     private void schedulingAlgorithm() {
+    	
     	Event currentEvent = currentEventQueue.pop();
     	if (!currentEvent.isFloorRequest) { //Elevator request
     		printWrapper("Event Requested by Elevator " + currentEvent.getElevatorNumber());
@@ -273,6 +329,7 @@ class Scheduler implements Runnable{
     	}
     	else { //Floor Request
     		//TODO destroy the evidence   ....
+    		
     		if(currentEvent != null) {
     			printWrapper("YAY IT GOES HERE" + currentEvent.getElevatorNumber());
     			
@@ -281,6 +338,8 @@ class Scheduler implements Runnable{
             	return;
     			
     		}
+    		
+    		
     		
     		boolean eventDirection = currentEvent.getUpDown();
         	MotorState stateDirection = null;
@@ -321,29 +380,42 @@ class Scheduler implements Runnable{
         		states.add(motorState);
         	}
         	
+        	boolean eventAdded = false; //boolean to check if Event got scheduled
         	//Iterates through the ArrayList of MotorStates and chooses the Elevators in the correct Direction of the event
         	for(int i=0; i<4;i++){
-        		if ((states.get(i) == stateDirection || states.get(i) == MotorState.STOPPED)&& (states.get(i)!= MotorState.STUCK)) {
+        		if ((states.get(i) == stateDirection || states.get(i) == MotorState.STOPPED) && (states.get(i)!= MotorState.STUCK)) {
         			correctDirection.add(i);	
+        			eventAdded = true;
         		}
         	}
         	
-        	//Chooses the Elevator closest to the Floor
-        	int minimum = 8;
+        	//Error check: Event did not get scheduled. Revert to default
+        	if (!eventAdded) {
+        		for(int i=0; i<4;i++){
+            		if ((states.get(i)!= MotorState.STUCK)) {
+            			correctDirection.add(i);	
+            			eventAdded = true;
+            		}
+            	}
+        	}
+        	
+        	//Chooses the Elevator closest to the Floor of current Event
+        	int minimum = 100;
         	int minimum_index = 0;
         	for(int i = 0; i<4; i++){
-        	    if((floorDifferences.get(i)< minimum)&& (correctDirection.contains(i)) && (states.get(i)!= MotorState.STUCK)){
+        	    if((floorDifferences.get(i) < minimum) && (correctDirection.contains(i)) && (states.get(i)!= MotorState.STUCK)){
         	        minimum = floorDifferences.get(i);
         	        minimum_index = i;
         	    }
-        	}
-        	
+        	}   	
         	
         	printWrapper("Chose elevator " + minimum_index);
         	elevatorScheduler(minimum_index, currentEvent);
         	
     		
     	}
+    	
+    	//WHAT IF SCHEDULER QUEUE IS EMPTY???????TODO
     	
     }
 
@@ -354,23 +426,39 @@ class Scheduler implements Runnable{
 	private void elevatorScheduler(int elevatorID, Event currentEvent) {
 		//JX: ok... I have no clue why we are using a temp list that's passed in...
 		
-		LinkedList<Event> elevatorQueue = elevatorQueues.get(elevatorID);
+		//LinkedList<Event> elevatorQueue = elevatorQueues.get(elevatorID);
+		
+		
+		//Check for Duplicates
+		LinkedList<Event> currentQueue = elevatorQueues.get(currentEvent.getElevatorNumber());
+		boolean duplicate = false;
+		for (int j = 0; j < currentQueue.size(); j++) {
+ 		   if ((currentQueue.get(j).getTargetFloor() == currentEvent.getTargetFloor()) && (currentQueue.get(j).getFinalDestination() == currentEvent.getFinalDestination())) {
+ 			  duplicate = true;
+ 		   }
+ 	   }
 		
 		//Add the event
-		elevatorQueue.add(currentEvent);
+	    if (!duplicate) {
+	    	elevatorQueues.get(elevatorID).add(currentEvent);   	
+	    }
+		
+		Elevator currentElevator = elevatorInterfacesList.get(elevatorID).getElevator();
+	
 		
 		printWrapper("elevator scheduler ... ");
-		if(elevatorQueue.size() < 2) {
+		if(elevatorQueues.get(elevatorID).size() < 2) {
 			
 			printWrapper("Only Task: No need to sort");
 		}
 		
 		/**
-		 * ?: Null check should be at the start not here
+		 * ?: Null check should be at the start not here TODO
 		 */
-		//if the elevator is going down then sort the list in ascending order
+		//if the elevator is going up then sort the list in ascending order
+		/**
 		else if(currentEvent.getUpDown()){
-			if(elevatorQueue == null) {
+			if(elevatorQueues.get(elevatorID) == null) {
 				printWrapper("tempEle is NULL !!! ERROR");
 			}else if(Comparator.comparing(Event::getTargetFloor) == null){
 				printWrapper("The other thing is NULL !!! ERROR");
@@ -378,7 +466,7 @@ class Scheduler implements Runnable{
 
 			Comparator<Event> eventComparator = Comparator.comparingInt(Event::getTargetFloor);
 			//forget sorting for now...
-			Collections.sort(elevatorQueue, eventComparator);
+			Collections.sort(elevatorQueues.get(elevatorID), eventComparator);
 			}
 		}
 		
@@ -386,10 +474,52 @@ class Scheduler implements Runnable{
 		else if(!currentEvent.getUpDown()){
 		
 		//forget sorting for now...
-			Collections.sort(elevatorQueue, Comparator.comparingInt(Event::getTargetFloor).reversed());
+			Collections.sort(elevatorQueues.get(elevatorID), Comparator.comparingInt(Event::getTargetFloor).reversed());
+		}
+		**/
+
+		//Sort in ascending order if the elevator is going up
+		else if (currentElevator.getPreviousDirection().equals(MotorState.UP)) {
+				if (currentEvent.getTargetFloor() > currentElevator.getCurrentFloor()) {
+					Comparator<Event> eventComparator = Comparator.comparingInt(Event::getTargetFloor);
+					Collections.sort(elevatorQueues.get(elevatorID), eventComparator);
+					printWrapper("MEEEEEEEEEEE@@@@@@@@@@@");
+				}
+		}
+		//Sort in descending order if the elevator is going down
+		else if (currentElevator.getPreviousDirection().equals(MotorState.DOWN)) {
+				if (currentEvent.getTargetFloor() < currentElevator.getCurrentFloor()) {
+					Comparator<Event> eventComparator = Comparator.comparingInt(Event::getTargetFloor).reversed();
+					Collections.sort(elevatorQueues.get(elevatorID), eventComparator);	
+					printWrapper("MEEEEEEEEEEE22222222222");
+				}
+			
 		}
 		
-		sendLamps(elevatorQueue, elevatorID); //Send list of lamps to chosen elevator
+		printWrapper("Event Target Floor: " + currentEvent.getTargetFloor() + " && Elevator Current Floor: " + currentElevator.getCurrentFloor());
+		
+		//New Algorithm for Improvement TODO
+		//if (ElevatorMotorState == UP){
+			//if (Event Target < Elevator.currentFloor){
+					//Add event to END of LIST
+		    //else {
+				//add event to list and sort in ascending Order
+		       //}
+		//else if (ElevatorMotorState == DOWN) {
+			//if (Event Target > Elevator.currentFloor){
+					//Add event to END of LIST
+		    //else {
+				//add event to list and sort in descending Order
+		       //}
+		  //}
+		//else {
+			//add Event to Queue at End of List
+	     //}
+		
+		printWrapper("Elevator Queue: " + elevatorQueues.get(elevatorID)); //print elevator queue
+		
+		
+		sendLamps(elevatorQueues.get(elevatorID), elevatorID); //Send list of lamps to chosen elevator
 		sendPacket(elevatorID);
 		
 		//The send socket should include the head of the event list in the linkedList of the arrayList containing the Elevator Lists
@@ -468,7 +598,7 @@ class Scheduler implements Runnable{
 		}
 	}
     	
-    	//TODO check that event was added.
+    	//Check that event was added.
     	setState();
     	System.out.println("New event added: " + eventList.get(eventList.size()-1));
     	notifyAll();
@@ -533,11 +663,11 @@ class Scheduler implements Runnable{
 
     public void run()
     {
-        while(completedEventList.size() < 2 * totalEventsCount) {
+        while(completedEventList.size() < 2 * totalEventsCount) { //TODO Change to 2 *
         	recieve();
         	printList();
 
-        	if(currentEventQueue.size() > 0) {
+        	if(currentEventQueue.size() > 0) { //TODO
         		schedulingAlgorithm();
         	}
             try {
