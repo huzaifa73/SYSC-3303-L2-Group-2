@@ -163,7 +163,12 @@ class Scheduler implements Runnable{
        Event currentEvent = Event.rebuildEvent(data);
        if(currentEvent.getIsComplete()) {
     	   printWrapper("Got a completed event: " + currentEvent.getElevatorNumber());
+
+    	   printWrapper("Current Queue: " + elevatorQueues.get(currentEvent.getElevatorNumber()));
     	   elevatorQueues.get(currentEvent.getElevatorNumber()).pop();
+    	   
+    	   printWrapper("Remaining Queue: " + elevatorQueues.get(currentEvent.getElevatorNumber()));
+    	   
     	   completedEventList.add(currentEvent);
     	   gui.setCompleteCount(completedEventList.size(), 2*totalEventsCount);
        		System.out.println("CURRENT NUMBER OF COMPLETED EVENTS: " + completedEventList.size() + 
@@ -189,6 +194,7 @@ class Scheduler implements Runnable{
      */
     private void sendPacket(int elevatorIndex) {
     	Event eventPeeked = (elevatorQueues.get(elevatorIndex)).peek();
+    	printWrapper("EVENT PEEKED " + eventPeeked);
         byte msg[] = Event.buildByteArray(eventPeeked);
         try {
 			sendPacket =  new DatagramPacket(msg, msg.length,InetAddress.getLocalHost(),elevatorIndex+portElevator);
@@ -349,6 +355,10 @@ class Scheduler implements Runnable{
 		//JX: ok... I have no clue why we are using a temp list that's passed in...
 		
 		LinkedList<Event> elevatorQueue = elevatorQueues.get(elevatorID);
+		
+		//Add the event
+		elevatorQueue.add(currentEvent);
+		
 		printWrapper("elevator scheduler ... ");
 		if(elevatorQueue.size() < 2) {
 			
