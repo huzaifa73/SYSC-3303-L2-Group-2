@@ -373,7 +373,7 @@ class Elevator implements Runnable{
         if(!elevator_activated) {
         	printWrapper("Elevator is deactivated");
         }
-        checkElevatorErrorState();
+
         //printWrapper("HARD ERROR: Travel Fault from Elevator! Need Emergency Technician Right Away!");
     }
     
