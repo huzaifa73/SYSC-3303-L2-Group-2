@@ -151,6 +151,10 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 					
 					//Start timer display
 					timer.start();
+					
+					//Disable Start and Input Button
+					startButton.setEnabled(false);
+					fileInputButton.setEnabled(false);
 
 				}));
 		
@@ -161,7 +165,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 					schedulerObj.stopElevatorThreads();
 					//Stop the timer display
 					timer.stop();
-					startButton.setEnabled(false);
+					stopButton.setEnabled(false);
 							
 				}));
 				
