@@ -260,13 +260,9 @@ class Scheduler implements Runnable{
     	if (!currentEvent.isFloorRequest) { //Elevator request
     		printWrapper("Event Requested by Elevator " + currentEvent.getElevatorNumber());
     		int currentElevator = currentEvent.getElevatorNumber();
-    		LinkedList<Event> tempEle = new LinkedList<>();
-        	tempEle = (elevatorQueues.get(currentElevator));
+
 		
-			//Removed logic that guessed at completed event
-        	//TODO implement logic that checks completed event and handles it...
-		
-    		elevatorScheduler(tempEle, currentElevator, currentEvent);
+    		elevatorScheduler(currentElevator, currentEvent);
     		
     	}
     	else { //Floor Request
@@ -304,9 +300,9 @@ class Scheduler implements Runnable{
         		//If an elevator is doing nothing, give it a task
         		if(elevator.getReceivedInfo() == null && (elevator.getMotorState()!= MotorState.STUCK)) {
         			LinkedList<Event> tempEle = new LinkedList<>();
-                	tempEle = (elevatorQueues.get(elevator.getID()));
+
                 	printWrapper("Chose elevator " + elevator.getID());
-                	elevatorScheduler(tempEle, elevator.getID(), currentEvent);
+                	elevatorScheduler(elevator.getID(), currentEvent);
                 	return;
         		}
         		
@@ -337,10 +333,8 @@ class Scheduler implements Runnable{
         	}
         	
         	
-        	LinkedList<Event> tempEle = new LinkedList<>();
-        	tempEle = (elevatorQueues.get(minimum_index));
         	printWrapper("Chose elevator " + minimum_index);
-        	elevatorScheduler(tempEle, minimum_index, currentEvent);
+        	elevatorScheduler(minimum_index, currentEvent);
         	
     		
     	}
@@ -351,12 +345,12 @@ class Scheduler implements Runnable{
      * Method: Sorts the events of the Elevator
      * @param tempEle
      */
-	private void elevatorScheduler(LinkedList<Event> tempEle, int elevatorID, Event currentEvent) {
+	private void elevatorScheduler(int elevatorID, Event currentEvent) {
 		//JX: ok... I have no clue why we are using a temp list that's passed in...
 		
-		tempEle.add(currentEvent);
+		LinkedList<Event> elevatorQueue = elevatorQueues.get(elevatorID);
 		printWrapper("elevator scheduler ... ");
-		if(tempEle.size() < 2) {
+		if(elevatorQueue.size() < 2) {
 			
 			printWrapper("Only Task: No need to sort");
 		}
@@ -366,38 +360,26 @@ class Scheduler implements Runnable{
 		 */
 		//if the elevator is going down then sort the list in ascending order
 		else if(currentEvent.getUpDown()){
-			if(tempEle == null) {
+			if(elevatorQueue == null) {
 				printWrapper("tempEle is NULL !!! ERROR");
 			}else if(Comparator.comparing(Event::getTargetFloor) == null){
 				printWrapper("The other thing is NULL !!! ERROR");
 			}else {
-				//the list is empty at the beginning isn't it...
-				//
-				//
-				//
-			printWrapper("Before compare: tempEle size = " + tempEle.size());
-			
-			//
-			//
+
 			Comparator<Event> eventComparator = Comparator.comparingInt(Event::getTargetFloor);
 			//forget sorting for now...
-			Collections.sort(tempEle, eventComparator);
+			Collections.sort(elevatorQueue, eventComparator);
 			}
 		}
 		
 		//if the elevator is going down then sort the list in descending order
 		else if(!currentEvent.getUpDown()){
-			//the list is empty at the beginning isn't it...
-			//
-			//
-			//
-		printWrapper("Before compare 2: tempEle size = " + tempEle.size());
 		
 		//forget sorting for now...
-			Collections.sort(tempEle, Comparator.comparingInt(Event::getTargetFloor).reversed());
+			Collections.sort(elevatorQueue, Comparator.comparingInt(Event::getTargetFloor).reversed());
 		}
 		
-		sendLamps(tempEle, elevatorID); //Send list of lamps to chosen elevator
+		sendLamps(elevatorQueue, elevatorID); //Send list of lamps to chosen elevator
 		sendPacket(elevatorID);
 		
 		//The send socket should include the head of the event list in the linkedList of the arrayList containing the Elevator Lists
