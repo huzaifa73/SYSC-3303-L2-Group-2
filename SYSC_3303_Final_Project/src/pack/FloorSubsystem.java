@@ -122,6 +122,8 @@ public class FloorSubsystem implements Runnable{
 		ArrayList<Event>eventList;
 		// Load list of request events from input file
 		eventList = readRequestEvents(); 
+		Comparator<Event> eventComparator = Comparator.comparingLong(Event::getDelay);
+		Collections.sort(eventList, eventComparator);
 		
 		//Checks if delay matches the delay in the events
 		//If not, wait that long
