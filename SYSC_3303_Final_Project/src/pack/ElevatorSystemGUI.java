@@ -107,7 +107,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 				};
 				timer=new Timer(100, countDown);
 				
-				startButton = new JButton("StartButton");
+				startButton = new JButton("Start");
 				startButton.addActionListener((e -> { //NOTE: only defaults... have not connected to other buttons.
 
 					//Convert floor time and door time from String to Double
