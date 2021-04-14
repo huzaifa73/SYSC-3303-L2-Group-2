@@ -270,7 +270,15 @@ class Scheduler implements Runnable{
     		
     	}
     	else { //Floor Request
-    		
+    		//TODO destroy the evidence   ....
+    		if(currentEvent != null) {
+    			printWrapper("YAY IT GOES HERE" + currentEvent.getElevatorNumber());
+    			
+            	printWrapper("Chose elevator " + currentEvent.getElevatorNumber());
+            	elevatorScheduler(currentEvent.getElevatorNumber(), currentEvent);
+            	return;
+    			
+    		}
     		
     		boolean eventDirection = currentEvent.getUpDown();
         	MotorState stateDirection = null;
