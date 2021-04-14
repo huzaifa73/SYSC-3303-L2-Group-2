@@ -160,6 +160,7 @@ class Elevator implements Runnable{
 		if(systemError == SystemError.TRAVEL_FAULT){ // Deactivates the Elevator	
 			//Prints where the Elevator is Stuck.
 			gui.setElevatorState(id, "OUT_OF_ORDER");
+			gui.incrementPeople(id);
 			printWrapper("HARD ERROR: Travel Fault from Elevator! Need Emergency Technician Right Away! Stuck between " + currentFloor + " and " + floorstuck());
 			
 			elevator_activated =false; //turns of the elevator from the system
