@@ -328,6 +328,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	public void setPassengerCount(int n, int passCount) {
 		if(passengerCounters != null) {
 			if(passengerCounters[n-1] != null) {
+				passengerCounts[n-1] = passCount;
 				passengerCounters[n-1].setText("" + passCount);
 			}
 		}
@@ -435,6 +436,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 					elevator1[e1CurrentFloor -1].setBackground(Color.yellow);
 				}else if(state.equals("OUT_OF_ORDER")) {
 					elevator1[e1CurrentFloor -1].setBackground(Color.red);
+					
 					stuckCount += passengerCounts[0];
 
 					stuckPeople.setText("People who are trapped: " + stuckCount);
