@@ -78,7 +78,8 @@ public class FloorSubsystem implements Runnable{
 			
 				
 				try {
-					eventsList.add(new Event(true, Integer.parseInt(sArr[0]), sArr[1], Integer.parseInt(sArr[2]), Integer.parseInt(sArr[3]), Integer.parseInt(sArr[4])));   //parse sArr to retrieve information about the event
+					printWrapper("Sending this as the ele num " + Integer.parseInt(sArr[5]));
+					eventsList.add(new Event(true, Integer.parseInt(sArr[0]), sArr[1], Integer.parseInt(sArr[2]), Integer.parseInt(sArr[3]), Integer.parseInt(sArr[4]), Integer.parseInt(sArr[5])));   //parse sArr to retrieve information about the event
 				} catch (InvalidAttributesException e) {
 					System.out.println(e);
 					System.exit(1);
