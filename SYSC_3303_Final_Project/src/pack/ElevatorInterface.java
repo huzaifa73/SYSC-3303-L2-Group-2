@@ -143,10 +143,8 @@ public class ElevatorInterface implements Runnable{
            //call Event function rebuildEvent that will convert the byte into a Event object
            eventToSend = Event.rebuildEvent(data); //
            
-           elle.readInfo(eventToSend);
            
-           
-
+           elle.readInfo(eventToSend);        
 		
 	}
 	
@@ -160,7 +158,7 @@ public class ElevatorInterface implements Runnable{
 	//run method
 	public void run() {
 		while(true) {
-			if(elle.getSystemError() == SystemError.NO_ERROR) {
+			if(elle.getSystemError() == SystemError.NO_ERROR && elle.getElevatorActivation()) {
 				receive();
 			}else {
 				//printWrapper("Elevator out of order");
