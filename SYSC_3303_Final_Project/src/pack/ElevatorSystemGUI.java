@@ -20,7 +20,7 @@ import javax.swing.*;
 public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	
 	//Left Section fields
-	private int SIZE = 9;
+	private int SIZE = 10;
 	private JButton startButton; //Start Button field
 	private JButton stopButton; //Stop Button field
 	private JLabel floorTimeInstruction;
@@ -28,12 +28,14 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	private TextField floorTimeInput; //Floor Time input field
 	private TextField doorTimeInput; //Door Time Input Field
 	private JLabel eventCompletion;  //Count of number of completed events
-	private int completeCount;
-	private int passengerCount = 0;
+	private JLabel stuckPeople;  //Count of number of completed events
+	private int stuckCount =0;
+
 	private JLabel executionTime; //Execution Time of system
 	private JLabel elevatorSystemTitle;  //Title of GUI Elevator System
 	private JButton fileInputButton; //Button used to upload the file
 	File IOFile;
+
 	
 	//Table
 	//Using JButtons because they look nicer and style better
@@ -75,7 +77,6 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	public ElevatorSystemGUI(){
 		super("Elevator System");
 		
-		completeCount = 0;
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -108,7 +109,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 				};
 				timer=new Timer(100, countDown);
 				
-				startButton = new JButton("Start");
+				startButton = new JButton("StartButton");
 				startButton.addActionListener((e -> { //NOTE: only defaults... have not connected to other buttons.
 
 					//Convert floor time and door time from String to Double
@@ -152,10 +153,6 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 					
 					//Start timer display
 					timer.start();
-					
-					//Disable Start and Input Button
-					startButton.setEnabled(false);
-					fileInputButton.setEnabled(false);
 
 				}));
 		
@@ -166,7 +163,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 					schedulerObj.stopElevatorThreads();
 					//Stop the timer display
 					timer.stop();
-					stopButton.setEnabled(false);
+					startButton.setEnabled(false);
 							
 				}));
 				
@@ -184,11 +181,11 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 				doorTimeInstruction = new JLabel("Please input the opening/closing time for the doors in seconds below:");
 				
 
-				floorTimeInput = new TextField("6");
+				floorTimeInput = new TextField("1");
 				//floorTimeInput.addActionListener(this);
 				//floorTimeInput.addActionListener();
 				
-				doorTimeInput = new TextField("6");
+				doorTimeInput = new TextField("1");
 				//doorTimeInput.addActionListener(this);
 				
 				//doorTimeInput.addActionListener();
@@ -205,6 +202,8 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 				eventCompletion = new JLabel("");
 				elevatorSystemTitle = new JLabel("Elevator System: Group 2 - 2021");
 		
+				
+				stuckPeople = new JLabel("People who are trapped: " + stuckCount);
 		//Add file input HERE *******
 		fieldPanel.add(elevatorSystemTitle);
 		fieldPanel.add(fileInputButton);
@@ -214,6 +213,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 		fieldPanel.add(doorTimeInput);
 		fieldPanel.add(eventCompletion);
 		fieldPanel.add(executionTime);
+		fieldPanel.add(stuckPeople);
 		fieldPanel.add(ButtonPanel);
 	
 		
@@ -303,7 +303,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 		this.add(fieldPanel);
 		this.add(buttonPanel);
 		
-		this.setSize(800, 600);
+		this.setSize(1200, 1000);
 		this.setVisible(true);
 
 	}
@@ -326,7 +326,6 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	 * @param passCount The number of passengers in the elevator
 	 */
 	public void setPassengerCount(int n, int passCount) {
-		passengerCount = passCount;
 		if(passengerCounters != null) {
 			if(passengerCounters[n-1] != null) {
 				passengerCounters[n-1].setText("" + passCount);
@@ -436,6 +435,9 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 					elevator1[e1CurrentFloor -1].setBackground(Color.yellow);
 				}else if(state.equals("OUT_OF_ORDER")) {
 					elevator1[e1CurrentFloor -1].setBackground(Color.red);
+					stuckCount += passengerCounts[0];
+
+					stuckPeople.setText("People who are trapped: " + stuckCount);
 				}else {
 					elevator1[e1CurrentFloor -1].setBackground(null);
 				}
@@ -448,6 +450,8 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 					elevator2[e2CurrentFloor -1].setBackground(Color.yellow);
 				}else if(state.equals("OUT_OF_ORDER")) {
 					elevator2[e2CurrentFloor -1].setBackground(Color.red);
+					stuckCount += passengerCounts[1];
+					stuckPeople.setText("People who are trapped: " + stuckCount);
 				}else {
 					elevator2[e2CurrentFloor -1].setBackground(null);
 				}
@@ -459,6 +463,8 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 					elevator3[e3CurrentFloor -1].setBackground(Color.yellow);
 				}else if(state.equals("OUT_OF_ORDER")) {
 					elevator3[e3CurrentFloor -1].setBackground(Color.red);
+					stuckCount += passengerCounts[2];
+					stuckPeople.setText("People who are trapped: " + stuckCount);
 				}else {
 					elevator3[e3CurrentFloor -1].setBackground(null);
 				}
@@ -470,6 +476,8 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 					elevator4[e4CurrentFloor -1].setBackground(Color.yellow);
 				}else if(state.equals("OUT_OF_ORDER")) {
 					elevator4[e4CurrentFloor -1].setBackground(Color.red);
+					stuckCount += passengerCounts[3];
+					stuckPeople.setText("People who are trapped: " + stuckCount);
 				}else {
 					elevator4[e4CurrentFloor -1].setBackground(null);
 				}
@@ -501,7 +509,7 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	}
 	
 	/**
-	 * Method: set completed event count
+	 * Method: Test Method
 	 */
 	public void setCompleteCount(int count, int total) {
 		if(eventCompletion != null) {
@@ -510,14 +518,8 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 			System.out.println("ERROR: completed events null");
 		}
 	}
-	/**
-	 * Method: add the passenger to the hard fault
-	 */
-	public void incrementPeople(int eleNum) {
+	
 
-		setPassengerCount(eleNum+1, passengerCount+1);
-
-	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
