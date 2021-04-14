@@ -421,25 +421,52 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 	 * @param state
 	 */
 	public void setElevatorState(int ElevatorNum, String state) {
-		
+		System.out.println("State: " + state);
 		switch(ElevatorNum + 1) {
 			case 1:
 				e1State = state;
 				elevator1[e1CurrentFloor -1].setText(e1State);
+				if(state.equals("Door Stuck")) {
+					elevator1[e1CurrentFloor -1].setBackground(Color.yellow);
+				}else if(state.equals("OUT_OF_ORDER")) {
+					elevator1[e1CurrentFloor -1].setBackground(Color.red);
+				}else {
+					elevator1[e1CurrentFloor -1].setBackground(null);
+				}
 
 				break;
 			case 2:
 				e2State = state;;
 				elevator2[e2CurrentFloor -1].setText(e2State);
-
+				if(state.equals("Door Stuck")) {
+					elevator2[e2CurrentFloor -1].setBackground(Color.yellow);
+				}else if(state.equals("OUT_OF_ORDER")) {
+					elevator2[e2CurrentFloor -1].setBackground(Color.red);
+				}else {
+					elevator2[e2CurrentFloor -1].setBackground(null);
+				}
 				break;
 			case 3:
 				e3State = state;
 				elevator3[e3CurrentFloor -1].setText(e3State);
+				if(state.equals("Door Stuck")) {
+					elevator3[e3CurrentFloor -1].setBackground(Color.yellow);
+				}else if(state.equals("OUT_OF_ORDER")) {
+					elevator3[e3CurrentFloor -1].setBackground(Color.red);
+				}else {
+					elevator3[e3CurrentFloor -1].setBackground(null);
+				}
 				break;
 			case 4:
 				e4State = state;
 				elevator4[e4CurrentFloor -1].setText(e4State);
+				if(state.equals("Door Stuck")) {
+					elevator4[e4CurrentFloor -1].setBackground(Color.yellow);
+				}else if(state.equals("OUT_OF_ORDER")) {
+					elevator4[e4CurrentFloor -1].setBackground(Color.red);
+				}else {
+					elevator4[e4CurrentFloor -1].setBackground(null);
+				}
 				break;
 			default:
 				//error
