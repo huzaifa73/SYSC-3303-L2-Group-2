@@ -179,11 +179,11 @@ public class ElevatorSystemGUI extends JFrame implements ActionListener {
 				doorTimeInstruction = new JLabel("Please input the opening/closing time for the doors in seconds below:");
 				
 
-				floorTimeInput = new TextField("1");
+				floorTimeInput = new TextField("6");
 				//floorTimeInput.addActionListener(this);
 				//floorTimeInput.addActionListener();
 				
-				doorTimeInput = new TextField("1");
+				doorTimeInput = new TextField("6");
 				//doorTimeInput.addActionListener(this);
 				
 				//doorTimeInput.addActionListener();
