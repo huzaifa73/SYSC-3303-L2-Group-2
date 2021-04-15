@@ -676,11 +676,6 @@ class Scheduler implements Runnable{
 			try {
 			    Thread.sleep(1000);
 			} catch (InterruptedException e) {}
-
-			sendPacket(0);
-			sendPacket(1);
-			sendPacket(2);
-			sendPacket(3);
 		}
 		
         }
