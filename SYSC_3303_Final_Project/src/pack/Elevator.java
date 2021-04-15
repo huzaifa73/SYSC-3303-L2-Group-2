@@ -16,7 +16,6 @@ class Elevator implements Runnable{
 	private ElevatorSystemGUI gui;
 	private Scheduler scheduler;
     private int id; //id of the elevator
-    //private ArrayList<String> statusDirection;
     
     //set of fields to store the events for the elevator.		
     private Event newReceivedInfo;
@@ -29,10 +28,7 @@ class Elevator implements Runnable{
 
     private SystemError systemError; //Field Storing the event error status.
     private boolean doorOpen; //boolean to storing if the door is open, true if open, false otherwise
-    
-    //Keep track of button lamps that are pressed with list //TODO
-    
-    
+  
     private MotorState motorState;
     private MotorState previousDirection;
     private ElevatorStates state;
@@ -56,9 +52,9 @@ class Elevator implements Runnable{
     private boolean softError;
     private int passengerCount;
     
-    //*****Iteration 5
     private Boolean elevatorLamps[]; //Array of Elevator lamps 
     private int count = 0;
+    private int destinationCount = 0;
     
     /**
      * Create a new Elevator with the assigned Scheduler, Constructor.
@@ -87,7 +83,6 @@ class Elevator implements Runnable{
         //newReceivedInfo = new Event();
         oldReceivedInfo = new Event();
         
-        //****ADDED Iteration 5
         elevatorLamps = new Boolean[22]; //Initialized default as 22 floors
 
     }
@@ -109,8 +104,6 @@ class Elevator implements Runnable{
         elevator_activated = true; // Activates the elevator as soon as it is constructed.
         door_stuck = false; // door not stuck.
         
-        //elevatorLamps = new ArrayList();
-        //statusDirection = new ArrayList();
         this.id = ID; //Sets the ID
         this.currentFloor = 1;
         this.targetFloor = -1;
@@ -118,7 +111,7 @@ class Elevator implements Runnable{
         sendingInfo = new Event();
         //newReceivedInfo = new Event();
         oldReceivedInfo = new Event();
-        previousDirection = MotorState.UP; //TODO Added 
+        previousDirection = MotorState.UP; 
 
     }
 	
@@ -138,14 +131,11 @@ class Elevator implements Runnable{
         elevator_activated = true; // Activates the elevator as soon as it is constructed.
         door_stuck = false; // door not stuck.
         
-        //elevatorLamps = new ArrayList();
-        //statusDirection = new ArrayList();
         this.id = ID; //Sets the ID
         this.currentFloor = 1;
         this.targetFloor = -1;
         tempTargetFloor = -1;
         sendingInfo = new Event();
-        //newReceivedInfo = new Event();
         oldReceivedInfo = new Event();
 
     }
@@ -164,7 +154,7 @@ class Elevator implements Runnable{
 			printWrapper("HARD ERROR: Travel Fault from Elevator! Need Emergency Technician Right Away! Stuck between " + currentFloor + " and " + floorstuck());
 			
 			elevator_activated =false; //turns of the elevator from the system
-			//System.out.println("Elevator " + id + " is Stucked between floor: "+ currentFloor +" and "+ floorstuck()); 
+			
 		}
 	}
 	
@@ -244,8 +234,6 @@ class Elevator implements Runnable{
 	public boolean getElevatorActivation(){
 		return elevator_activated;
 	}
-	
-
 
     
     /**
@@ -265,15 +253,12 @@ class Elevator implements Runnable{
     public void readInfo(Event data) {
     	printWrapper("Read info: " +  data);
     	//Extract  info from DataObject
-    	//sendingInfo = data;
     	
     	this.elevatorLamps = elevatorLamps;
     	
     	newReceivedInfo = data;
-
-    	//currentFloor = data.getCurrentFloor();   
+ 
     	this.targetFloor = data.getTargetFloor();
-    	//upDown = data.getUpDown();
     	timeString = data.getTimeString();
     	systemError = data.getErrorType(); //setting the error Type initially.
     }
@@ -284,7 +269,6 @@ class Elevator implements Runnable{
      * @param button The button that was pressed
      */
     public void pushButton(int button) {
-    	//elevatorLamps.get(button) = true;
     	tempTargetFloor = button;
     	readInfo(newReceivedInfo);
     }
@@ -373,8 +357,7 @@ class Elevator implements Runnable{
         if(!elevator_activated) {
         	printWrapper("Elevator is deactivated");
         }
-
-        //printWrapper("HARD ERROR: Travel Fault from Elevator! Need Emergency Technician Right Away!");
+        
     }
     
 
@@ -389,7 +372,6 @@ class Elevator implements Runnable{
 		case idleState :
 			gui.setElevatorState(id,"IDLE");
 			//Set the motorState to STOPPED  and open the door
-			//previousDirection= motorState;
 			motorState = motorState.STOPPED;
 			doorOpen = true;
 			
@@ -409,7 +391,6 @@ class Elevator implements Runnable{
 			break;
 			
 		case moveState:
-			//gui.setElevatorState(id,"MOVING");
 			//Check if there is new Received info from the Scheduler
 			if (newReceivedInfo != null) {
 				//Check if targetFloot is greater than currentFloor
@@ -478,7 +459,7 @@ class Elevator implements Runnable{
 			printWrapper("" + newReceivedInfo);
 			if (newReceivedInfo != null) {
 				if (targetFloor == currentFloor) {
-					gui.setElevatorState(id,"ARRIVED"); //TODO
+					gui.setElevatorState(id,"ARRIVED"); 
 					printState();
 					//Change state of motor to stopped and open door
 					motorState = motorState.STOPPED;
@@ -493,7 +474,7 @@ class Elevator implements Runnable{
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					
+					destinationCount++;
 					/**
 					 * ?: Event should only be marked complete if it is an elevator event?
 					 * Put first block in else?
@@ -509,7 +490,7 @@ class Elevator implements Runnable{
 					if(sendingInfo.isFloorRequest) {
 						sendingInfo = new Event(sendingInfo);
 						sendingInfo.setCurrentFloor(currentFloor);
-						sendingInfo.setElevatorNumber(id);  //TODO
+						sendingInfo.setElevatorNumber(id);  
 						printWrapper("NEW CREATED EVENT: (" + count + ")"  + sendingInfo);
 						eleInt.send(sendingInfo);
 						gui.setPassengerCount(id+1, ++passengerCount);
@@ -518,7 +499,7 @@ class Elevator implements Runnable{
 						gui.setPassengerCount(id+1, --passengerCount);
 					}
 					
-					try { //TODO TESTING
+					try { 
 						Thread.sleep(1000); 
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -570,7 +551,7 @@ class Elevator implements Runnable{
 			oldReceivedInfo = newReceivedInfo;
 			
 			//Check if motorState equals UP. If true, then move elevator UP
-			if (motorState.equals(MotorState.UP) && currentFloor < targetFloor) { //TODO
+			if (motorState.equals(MotorState.UP) && currentFloor < targetFloor) { 
 				starttime = System.nanoTime(); //gets the StartTime for moving up by 1 floor.
 				try {
 					Thread.sleep(averageFloorMoving/NANO_SECOND_CONVERSION*1000);  //The time it takes the elevator to move one floor
@@ -589,12 +570,12 @@ class Elevator implements Runnable{
 				
 				
 				currentFloor++;
-				printWrapper("Elevator " + id + " moved to: " + currentFloor + " . Target Floor: " + targetFloor); //TODO
+				printWrapper("Elevator " + id + " moved to: " + currentFloor + " . Target Floor: " + targetFloor); 
 				gui.setElevatorFloor(id, currentFloor);
 				
 			}
 			//Check if motorState equals UP. If true, then move elevator DOWN
-			else if (motorState.equals(MotorState.DOWN) && currentFloor > targetFloor) { //TODO
+			else if (motorState.equals(MotorState.DOWN) && currentFloor > targetFloor) {
 				starttime = System.nanoTime(); //gets the StartTime for moving down by 1 floor.
 				try {
 					Thread.sleep(averageFloorMoving/NANO_SECOND_CONVERSION*1000);  //The time it takes the elevator to move one floor
@@ -615,16 +596,13 @@ class Elevator implements Runnable{
 				}
 
 				currentFloor--; //decrements floor since going down.
-				printWrapper("Elevator " + id + " moved to: " + currentFloor + " . Target Floor: " + targetFloor); //TODO //Prints formatted information.
+				printWrapper("Elevator " + id + " moved to: " + currentFloor + " . Target Floor: " + targetFloor);  //Prints formatted information.
 				gui.setElevatorFloor(id, currentFloor);
 			}
 			
 			//Request an event from the scheduler to see if there's an updated one
 			//readEvent();
 			
-			/**
-			 * ?: Doesn't this overwrite the event, losing the current one?
-			 */
 			//Check if there is a new request
 			if (oldReceivedInfo != newReceivedInfo) {
 				state = state.moveState;
