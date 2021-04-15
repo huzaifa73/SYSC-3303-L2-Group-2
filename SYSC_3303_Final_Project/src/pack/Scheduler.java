@@ -246,6 +246,9 @@ class Scheduler implements Runnable{
      * Method: Send Packet to Elevators
      */
     private void sendPacket(int elevatorIndex) {
+	if(elevatorQueues.get(elevatorIndex).size() == 0) {
+    		return;
+    	}
     	Event eventPeeked = (elevatorQueues.get(elevatorIndex)).peek(); //TODO BEfore: peeked()
     	printWrapper("EVENT PEEKED " + eventPeeked);
         byte msg[] = Event.buildByteArray(eventPeeked);
@@ -667,12 +670,19 @@ class Scheduler implements Runnable{
         	recieve();
         	printList();
 
-        	if(currentEventQueue.size() > 0) { //TODO
+        	if(currentEventQueue.size() > 0) {
         		schedulingAlgorithm();
-        	}
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {}
+        	}else {
+			try {
+			    Thread.sleep(1000);
+			} catch (InterruptedException e) {}
+
+			sendPacket(0);
+			sendPacket(1);
+			sendPacket(2);
+			sendPacket(3);
+		}
+		
         }
         
         printWrapper("All events completed!");
