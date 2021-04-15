@@ -13,6 +13,7 @@ import javax.swing.*;
 /**
  * @author Blake, Hovish, Jerry
  *
+ This class represents the GUI of the whole code that enables the user(modulator to understand the system).
  */
 public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 	
@@ -57,7 +58,8 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 		
 	
 	
-	public ElevatorSystemGUI(){
+	public ElevatorSystemGUI(){\
+		//setting up the format of the different buttons and text boxes
 		super("Elevator System");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -72,7 +74,8 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 		eleSystem = new ElevatorSystem();
 		
 		//LEFT SECTION
-		
+				
+			//creating the different buttons to interact with the user
 				startButton = new JButton("StartButton");
 				startButton.addActionListener((e -> { //NOTE: only defaults... have not connected to other buttons.
 
@@ -107,7 +110,7 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 		            filename = C.getSelectedFile();
 				}));
 				
-
+				//enables the user to input the floor moving time
 				floorTimeInput = new TextField("Please Enter the Avg Floor moving Time");
 				//floorTimeInput.addActionListener();
 				
@@ -218,12 +221,20 @@ public class ElevatorSystemGUI extends JFrame implements ElevatorSystemView {
 
 	}
 	
+	/**
+	* Main method to create the GUI for interaction.
+	*/
 	public static void main(String[] args) {
 		new ElevatorSystemGUI();
 	}
 	
-	
+/**
+*Upddates the Elevator floor on the GUI
+*@param ElevatorNum Elevator interacting with
+*@param Floor - Floor Movement displayed.
+*/	
 public void setElevatorFloor(int ElevatorNum, int Floor) {
+		//Switching bwtween the different elevator to constantly update the status.
 		
 		switch(ElevatorNum) {
 			case 1:
@@ -263,8 +274,14 @@ public void setElevatorFloor(int ElevatorNum, int Floor) {
 			}
 	}
 	
+	/**
+	*Updates the Elevator target floor on the GUI
+	*@param ElevatorNum Elevator interacting with
+	*@param Floor - Floor Movement displayed.
+	*/
 	
 	public void setTargetFloor(int ElevatorNum, int Floor) {
+		//Settung the Target Floor for displaying information to the user.
 
 		switch(ElevatorNum) {
 			case 1:
@@ -293,6 +310,11 @@ public void setElevatorFloor(int ElevatorNum, int Floor) {
 		}
 	}
 	
+	/**
+	*Updates the Elevator state on the GUI
+	*@param ElevatorNum Elevator interacting with
+	*@param Floor - Floor Movement displayed.
+	*/
 	public void setElevatorState(int ElevatorNum, String state) {
 		
 		switch(ElevatorNum) {
@@ -345,6 +367,9 @@ public void setElevatorFloor(int ElevatorNum, int Floor) {
 //
 //	}
 //	
+	/**
+	*Print method used to display the differemt states
+	*/
 	public void testprint() {
 		System.out.println("CAN CALL THIS FUNCTION");
 	}
